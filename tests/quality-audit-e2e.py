@@ -32,6 +32,20 @@ with sync_playwright() as playwright:
             assert page.locator(".product-card").count() == 6
             for drink in ("Fresh Chapman", "Tigernut Milk", "Pineapple–Ginger Juice", "Assorted Minerals", "Chilled Malt Drink"):
                 assert page.get_by_role("heading", name=drink, exact=True).is_visible()
+            page.get_by_role("button", name="Soups", exact=True).click()
+            assert page.locator(".product-card").count() == 7
+            assert page.locator(".meal-builder").is_visible()
+            assert page.locator('img[src="assets/food/egusi-soup.webp"]').count() == 1
+            assert page.locator('img[src="assets/food/banga-soup.webp"]').count() == 1
+            assert page.locator('img[src="assets/food/owo-soup.webp"]').count() == 1
+            page.locator('[data-add="egusi"]').click()
+            page.locator('.meal-builder [data-filter="Swallows"]').click()
+            assert page.locator(".product-card").count() == 5
+            page.locator('[data-add="pounded"]').click()
+            page.locator('.meal-builder [data-filter="Proteins"]').click()
+            assert page.locator(".product-card").count() == 8
+            page.locator('[data-add="beef"]').click()
+            assert page.get_by_role("button", name="Bag 3").is_visible()
             page.get_by_role("button", name="All", exact=True).click()
             page.locator('[data-item="deal"]').click()
             assert page.locator(".item-dialog-photos img").count() == 4

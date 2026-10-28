@@ -19,3 +19,9 @@ The Veejay Meal Deal displays a four-photo grid of the actual demo components (j
 ## Expanded drinks
 
 `chapman.webp`, `tigernut.webp`, `pineapple-ginger.webp`, `minerals.webp`, and `malt.webp` are photorealistic menu illustrations generated for this sales demo on 2026-10-28. They are unbranded representations and should be replaced with approved Veejay Foods or supplier product photography before commercial launch.
+
+## Separate swallows and proteins
+
+The `pounded-yam.webp`, `eba.webp`, `semo.webp`, `fufu.webp`, `starch.webp`, `beef.webp`, `goat.webp`, `turkey.webp`, `catfish.webp`, `croaker.webp`, `assorted.webp`, and `stockfish.webp` menu illustrations were generated on 2026-10-28 to demonstrate independent soup, swallow, and protein selection. Replace them with approved Veejay Foods photography before commercial launch.
+
+`egusi-soup.webp`, `banga-soup.webp`, and `owo-soup.webp` are soup-only illustrations generated on the same date so their menu cards do not imply that a swallow is included.

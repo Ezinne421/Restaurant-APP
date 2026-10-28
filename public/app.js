@@ -1,9 +1,9 @@
 const MENU = [
   {id:'deal',name:'Veejay Meal Deal',description:'Jollof rice, grilled chicken, meat pie and chilled zobo.',price:5500,category:'Combos',badge:'LUNCH FAVOURITE'},
   {id:'jollof',name:'Smoky Jollof Rice',description:'Party-style jollof slow-cooked with tomatoes and peppers.',price:2000,category:'Rice & meals',badge:'BESTSELLER'},
-  {id:'chicken',name:'Grilled Chicken',description:'Flame-grilled chicken with our signature pepper marinade.',price:2500,category:'Rice & meals'},
+  {id:'chicken',name:'Grilled Chicken',description:'Flame-grilled chicken with our signature pepper marinade.',price:2500,category:'Proteins'},
   {id:'fried',name:'Garden Fried Rice',description:'Fluffy rice tossed with vegetables and fragrant spices.',price:2200,category:'Rice & meals'},
-  {id:'egusi',name:'Egusi & Pounded Yam',description:'Melon-seed soup, leafy greens and soft pounded yam.',price:3500,category:'Soups & swallow'},
+  {id:'egusi',name:'Egusi Soup',description:'Rich melon-seed soup with leafy greens and native seasoning.',price:2800,category:'Soups'},
   {id:'pie',name:'Freshly Baked Meat Pie',description:'Golden pastry filled with seasoned beef and vegetables.',price:800,category:'Pastries'},
   {id:'zobo',name:'Hibiscus Zobo',description:'Chilled house brew with ginger and pineapple.',price:700,category:'Drinks'},
   {id:'chapman',name:'Fresh Chapman',description:'Sparkling citrus fruit mix served cold with cucumber and orange.',price:1200,category:'Drinks',badge:'HOUSE FAVOURITE'},
@@ -12,24 +12,37 @@ const MENU = [
   {id:'minerals',name:'Assorted Minerals',description:'Choose a chilled cola, orange or lemon-lime soft drink.',price:600,category:'Drinks'},
   {id:'malt',name:'Chilled Malt Drink',description:'Rich, dark and refreshing non-alcoholic malt.',price:800,category:'Drinks'},
   {id:'puff',name:'Golden Puff Puff',description:'Six soft, golden bites made fresh today.',price:1000,category:'Pastries'},
-  {id:'banga',name:'Banga Soup & Starch',description:'Delta palm-fruit soup with catfish, native spices and starch.',price:4500,category:'Delta & Isoko',badge:'DELTA FAVOURITE'},
-  {id:'owo',name:'Owo Soup & Starch',description:'Isoko and Urhobo palm-oil soup with fish and crayfish.',price:4000,category:'Delta & Isoko'},
-  {id:'ukodo',name:'Ukodo — Yam & Goat Meat',description:'Delta pepper soup with yam, goat meat and native spices.',price:4500,category:'Delta & Isoko'},
-  {id:'ogbono',name:'Ogbono Soup & Eba',description:'Silky draw soup with assorted meat, stockfish and eba.',price:3800,category:'Soups & swallow'},
-  {id:'efo',name:'Efo Riro & Pounded Yam',description:'Vegetable soup with assorted meat and pounded yam.',price:4200,category:'Soups & swallow'},
-  {id:'okra',name:'Okra Soup & Semo',description:'Fresh okra with fish, assorted meat and soft semovita.',price:3500,category:'Soups & swallow'},
-  {id:'edikaikong',name:'Edikang Ikong & Fufu',description:'Waterleaf and pumpkin-leaf soup with assorted meat.',price:4500,category:'Soups & swallow'},
+  {id:'banga',name:'Banga Soup',description:'Delta palm-fruit soup with catfish and native spices.',price:3500,category:'Soups',region:'Delta & Isoko',badge:'DELTA FAVOURITE'},
+  {id:'owo',name:'Owo Soup',description:'Isoko and Urhobo palm-oil soup with fish and crayfish.',price:3200,category:'Soups',region:'Delta & Isoko'},
+  {id:'ukodo',name:'Ukodo — Yam & Goat Meat',description:'Delta pepper soup with yam, goat meat and native spices.',price:4500,category:'Rice & meals',region:'Delta & Isoko'},
+  {id:'ogbono',name:'Ogbono Soup',description:'Silky draw soup with traditional seasoning.',price:3000,category:'Soups'},
+  {id:'efo',name:'Efo Riro',description:'Deeply seasoned vegetable soup with peppers and leafy greens.',price:3300,category:'Soups'},
+  {id:'okra',name:'Okra Soup',description:'Fresh Nigerian okra soup with a rich savoury base.',price:2800,category:'Soups'},
+  {id:'edikaikong',name:'Edikang Ikong Soup',description:'Waterleaf and pumpkin-leaf soup with native seasoning.',price:3500,category:'Soups'},
+  {id:'pounded',name:'Pounded Yam',description:'Smooth, soft and freshly prepared yam swallow.',price:900,category:'Swallows'},
+  {id:'eba',name:'Eba',description:'Classic golden garri swallow, made smooth and firm.',price:700,category:'Swallows'},
+  {id:'semo',name:'Semovita',description:'Soft, smooth semovita portion for your chosen soup.',price:700,category:'Swallows'},
+  {id:'fufu',name:'Fufu',description:'Smooth cassava fufu portion, ready to pair with soup.',price:700,category:'Swallows'},
+  {id:'starch',name:'Delta Starch',description:'Glossy orange Delta starch, perfect with Banga or Owo soup.',price:900,category:'Swallows',badge:'DELTA CLASSIC'},
+  {id:'beef',name:'Beef',description:'Tender Nigerian-style beef in a light pepper glaze.',price:1200,category:'Proteins'},
+  {id:'goat',name:'Goat Meat',description:'Tender goat meat seasoned with peppers and native spices.',price:1800,category:'Proteins'},
+  {id:'turkey',name:'Grilled Turkey',description:'Pepper-seasoned grilled turkey portion.',price:2500,category:'Proteins'},
+  {id:'catfish',name:'Catfish',description:'Grilled catfish portion finished with Nigerian pepper.',price:2500,category:'Proteins'},
+  {id:'croaker',name:'Croaker Fish',description:'Golden croaker fish portion with a light pepper garnish.',price:2200,category:'Proteins'},
+  {id:'assorted',name:'Assorted Meat',description:'A mix of beef, tripe and cow skin in a pepper glaze.',price:1800,category:'Proteins'},
+  {id:'stockfish',name:'Stockfish',description:'Traditional stockfish pieces seasoned with pepper and onions.',price:1800,category:'Proteins'},
   {id:'moi',name:'Moi Moi',description:'Steamed bean pudding with peppers and egg.',price:1200,category:'Rice & meals'},
   {id:'ofada',name:'Ofada Rice & Ayamase',description:'Local rice with green-pepper sauce and assorted meat.',price:3800,category:'Rice & meals'},
   {id:'yam',name:'Yam Porridge — Asaro',description:'Tender yam in a palm-oil pepper sauce with fish and greens.',price:2800,category:'Rice & meals'}
 ];
 
 const PHOTOS = {
-  deal:'jollof.jpeg',jollof:'jollof.jpeg',chicken:'chicken.jpg',fried:'fried-rice.jpg',egusi:'egusi.jpg',pie:'meat-pie.jpeg',
-  zobo:'zobo.jpg',chapman:'chapman.webp',tigernut:'tigernut.webp',pineapple:'pineapple-ginger.webp',minerals:'minerals.webp',malt:'malt.webp',puff:'puff-puff.jpeg',banga:'banga.jpeg',owo:'owo.webp',ukodo:'ukodo.webp',ogbono:'ogbono.jpg',
-  efo:'efo.jpeg',okra:'mixed-okra.jpeg',edikaikong:'edikaikong.jpeg',moi:'moi-moi.jpg',ofada:'ofada-rice.jpeg',yam:'yam-porridge.jpeg'
+  deal:'jollof.jpeg',jollof:'jollof.jpeg',chicken:'chicken.jpg',fried:'fried-rice.jpg',egusi:'egusi-soup.webp',pie:'meat-pie.jpeg',
+  zobo:'zobo.jpg',chapman:'chapman.webp',tigernut:'tigernut.webp',pineapple:'pineapple-ginger.webp',minerals:'minerals.webp',malt:'malt.webp',puff:'puff-puff.jpeg',banga:'banga-soup.webp',owo:'owo-soup.webp',ukodo:'ukodo.webp',ogbono:'ogbono.jpg',
+  efo:'efo.jpeg',okra:'mixed-okra.jpeg',edikaikong:'edikaikong.jpeg',pounded:'pounded-yam.webp',eba:'eba.webp',semo:'semo.webp',fufu:'fufu.webp',starch:'starch.webp',
+  beef:'beef.webp',goat:'goat.webp',turkey:'turkey.webp',catfish:'catfish.webp',croaker:'croaker.webp',assorted:'assorted.webp',stockfish:'stockfish.webp',moi:'moi-moi.jpg',ofada:'ofada-rice.jpeg',yam:'yam-porridge.jpeg'
 };
-const CATEGORIES = ['All','Combos','Delta & Isoko','Rice & meals','Soups & swallow','Pastries','Drinks'];
+const CATEGORIES = ['All','Combos','Delta & Isoko','Rice & meals','Soups','Swallows','Proteins','Pastries','Drinks'];
 const STATUS = ['Placed','Preparing','Ready','Collected'];
 const STORE_KEY = 'veejay-sales-demo-v3';
 const money = value => `₦${Number(value).toLocaleString('en-NG')}`;
@@ -168,17 +181,22 @@ function renderCustomer() {
 }
 
 function customerMenu() {
-  const products = MENU.map(x=>menuItem(x.id)).filter(p=>(filter==='All'||p.category===filter)&&(!query||`${p.name} ${p.description} ${p.category}`.toLowerCase().includes(query.toLowerCase())));
+  const products = MENU.map(x=>menuItem(x.id)).filter(p=>(filter==='All'||p.category===filter||p.region===filter)&&(!query||`${p.name} ${p.description} ${p.category} ${p.region||''}`.toLowerCase().includes(query.toLowerCase())));
   const hours=orderingStatus();
   return `<main class="customer-main">
     <section class="hero"><div><span>FRESHLY MADE · FULL OF FLAVOUR</span><h1>Your favourites.<br>Your kind of <em>lunch.</em></h1><p>Order ahead. Skip the queue.</p><button class="light-button" data-filter-jump="Delta & Isoko">Explore Delta favourites →</button></div><img src="assets/food/jollof.jpeg" alt="Jollof rice with chicken and plantain"></section>
-    <section class="restaurant-strip"><div><div><h2>Veejay Foods</h2><span class="open-chip ${hours.open?'':'closed'}">● ${hours.label}</span></div><p>Nigerian favourites · Delta & Isoko · Pastries · Drinks</p><small>⌖ Abuja Municipal &nbsp; ◷ ${hours.detail} &nbsp; · &nbsp; Mon–Sat 8 AM–8 PM · Sun 10 AM–6 PM</small></div><span>✓ Pickup only</span></section>
+    <section class="restaurant-strip"><div><div><h2>Veejay Foods</h2><span class="open-chip ${hours.open?'':'closed'}">● ${hours.label}</span></div><p>Nigerian favourites · Soups · Swallows · Proteins · Drinks</p><small>⌖ Abuja Municipal &nbsp; ◷ ${hours.detail} &nbsp; · &nbsp; Mon–Sat 8 AM–8 PM · Sun 10 AM–6 PM</small></div><span>✓ Pickup only</span></section>
     <div class="shop-layout"><section><div class="section-heading"><div><h2>Explore the menu</h2><p>Real flavours, ready on your schedule.</p></div><span>${products.length} choices</span></div>
       <div class="chips">${CATEGORIES.map(c=>`<button class="${filter===c?'selected':''}" data-filter="${esc(c)}">${c}</button>`).join('')}</div>
+      ${['Soups','Swallows','Proteins'].includes(filter)?mealBuilder():''}
       <div class="product-grid">${products.map(productCard).join('')}</div>
       ${products.length?'':'<div class="empty-state"><b>No meals found</b><p>Try another search or category.</p><button data-clear-search>Clear search</button></div>'}
     </section>${basket()}</div>
   </main>`;
+}
+
+function mealBuilder() {
+  return `<div class="meal-builder"><div><span>BUILD YOUR MEAL</span><b>Choose each part separately</b></div>${[['Soups','1','Choose soup'],['Swallows','2','Choose swallow'],['Proteins','3','Add protein']].map(([category,step,label])=>`<button class="${filter===category?'active':''}" data-filter="${category}"><i>${step}</i><span><b>${label}</b><small>${category}</small></span></button>`).join('')}</div>`;
 }
 
 function productPhoto(p) {

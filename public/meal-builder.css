@@ -1,0 +1,95 @@
+.meal-builder {
+  display: grid;
+  grid-template-columns: 1.25fr repeat(3, 1fr);
+  gap: 9px;
+  margin: -8px 0 24px;
+  padding: 12px;
+  border: 1px solid #dfe7dc;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f3f7ef, #fff);
+}
+
+.meal-builder > div {
+  padding: 7px 8px;
+}
+
+.meal-builder > div span,
+.meal-builder > div b {
+  display: block;
+}
+
+.meal-builder > div span {
+  color: var(--green);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: 1.4px;
+}
+
+.meal-builder > div b {
+  margin-top: 6px;
+  font-size: 11px;
+}
+
+.meal-builder button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  text-align: left;
+}
+
+.meal-builder button.active {
+  border-color: var(--green);
+  box-shadow: 0 0 0 1px var(--green);
+}
+
+.meal-builder i {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #e7f2e3;
+  color: var(--green);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.meal-builder button b,
+.meal-builder button small {
+  display: block;
+}
+
+.meal-builder button b {
+  font-size: 9px;
+}
+
+.meal-builder button small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 7px;
+}
+
+@media (max-width: 760px) {
+  .meal-builder {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .meal-builder > div {
+    grid-column: 1 / -1;
+  }
+
+  .meal-builder button {
+    display: block;
+    text-align: center;
+  }
+
+  .meal-builder i {
+    margin: 0 auto 6px;
+  }
+}

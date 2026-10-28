@@ -28,8 +28,8 @@ cp -a "$PROJECT_DIR/public/." "$ANDROID_DIR/app/src/main/assets/"
     --java "$BUILD_DIR/generated" \
     --min-sdk-version 23 \
     --target-sdk-version 35 \
-    --version-code 10 \
-    --version-name 2.8.0 \
+    --version-code 11 \
+    --version-name 2.9.0 \
     -A "$ANDROID_DIR/app/src/main/assets" \
     "$BUILD_DIR/compiled/resources.zip" \
     -o "$BUILD_DIR/unsigned.apk"
