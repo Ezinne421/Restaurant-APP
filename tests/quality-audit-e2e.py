@@ -19,6 +19,9 @@ with sync_playwright() as playwright:
             page.locator(f'[data-start-role="{role}"]').first.click()
         if page.locator(".auth-dialog").count():
             page.locator("[data-close]").click()
+        if role == "customer":
+            visible_logos = page.locator('img[src="assets/veejay-logo.png"]').evaluate_all("images => images.filter(img => img.getClientRects().length).length")
+            assert visible_logos == 1
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), role
         assert page.evaluate("[...document.images].every(img => img.complete && img.naturalWidth > 0)"), role
         assert page.evaluate("new Set([...document.querySelectorAll('[id]')].map(el => el.id)).size === document.querySelectorAll('[id]').length"), role

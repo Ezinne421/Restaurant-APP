@@ -26,6 +26,9 @@ public final class MainActivity extends Activity {
         getWindow().setStatusBarColor(Color.WHITE);
         getWindow().setNavigationBarColor(Color.WHITE);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(false);
+        }
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
@@ -41,7 +44,7 @@ public final class MainActivity extends Activity {
                 bottom = windowInsets.getSystemWindowInsetBottom();
             }
             view.setPadding(0, top, 0, bottom);
-            return windowInsets;
+            return Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ? WindowInsets.CONSUMED : windowInsets;
         });
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -65,6 +68,7 @@ public final class MainActivity extends Activity {
             }
         });
         setContentView(webView);
+        webView.requestApplyInsets();
 
         if (savedInstanceState == null) {
             webView.loadUrl("file:///android_asset/index.html");

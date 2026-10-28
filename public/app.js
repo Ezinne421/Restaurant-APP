@@ -111,7 +111,7 @@ function shell(content, options={}) {
   </header>
   <div class="demo-ribbon"><span><i></i> INTERACTIVE CLIENT DEMO</span><span>No real payments or customer messages</span></div>
   ${content}
-  <footer><div><img src="assets/veejay-logo.png" alt=""><b>Veejay Foods</b></div><span>Pick it. Pay it. Collect it.</span><span>Full business demo · Offline-ready</span></footer>`;
+  <footer><div><b>Veejay Foods</b></div><span>Pick it. Pay it. Collect it.</span><span>Full business demo · Offline-ready</span></footer>`;
 }
 
 function render() {
@@ -158,7 +158,7 @@ function customerMenu() {
   const products = MENU.map(x=>menuItem(x.id)).filter(p=>(filter==='All'||p.category===filter)&&(!query||`${p.name} ${p.description} ${p.category}`.toLowerCase().includes(query.toLowerCase())));
   return `<main class="customer-main">
     <section class="hero"><div><span>FRESHLY MADE · FULL OF FLAVOUR</span><h1>Your favourites.<br>Your kind of <em>lunch.</em></h1><p>Order ahead. Skip the queue.</p><button class="light-button" data-filter-jump="Delta & Isoko">Explore Delta favourites →</button></div><img src="assets/food/jollof.jpeg" alt="Jollof rice with chicken and plantain"></section>
-    <section class="restaurant-strip"><img src="assets/veejay-logo.png" alt=""><div><div><h2>Veejay Foods</h2><span class="open-chip">● Open for pickup</span></div><p>Nigerian favourites · Delta & Isoko · Pastries · Drinks</p><small>⌖ Abuja Municipal &nbsp; ◷ Ready from 25–35 minutes</small></div><span>✓ Pickup only</span></section>
+    <section class="restaurant-strip"><div><div><h2>Veejay Foods</h2><span class="open-chip">● Open for pickup</span></div><p>Nigerian favourites · Delta & Isoko · Pastries · Drinks</p><small>⌖ Abuja Municipal &nbsp; ◷ Ready from 25–35 minutes</small></div><span>✓ Pickup only</span></section>
     <div class="shop-layout"><section><div class="section-heading"><div><h2>Explore the menu</h2><p>Real flavours, ready on your schedule.</p></div><span>${products.length} choices</span></div>
       <div class="chips">${CATEGORIES.map(c=>`<button class="${filter===c?'selected':''}" data-filter="${esc(c)}">${c}</button>`).join('')}</div>
       <div class="product-grid">${products.map(productCard).join('')}</div>
