@@ -3,7 +3,7 @@
 These are representative sample images, not Veejay Foods product photographs. The zobo photograph shows third-party sample packaging. Repository availability does not establish commercial image rights; replace with approved Veejay photography before publishing a commercial menu.
 
 - `jollof.jpeg`, `fried-rice.jpg`, `meat-pie.jpeg`, `puff-puff.jpeg`: https://github.com/Kim-berlyA/recipe-finder/tree/main/img (original filenames jollof-rice.jpeg, fried-rice.jpg, meat-pie.jpeg, puff-puff.jpeg).
-- `chicken.jpg`, `egusi.jpg`, `meal-deal.jpg`: https://github.com/bimbo-ade/Nigeria-Cuisine-/tree/main/images (original filenames img8.jpg, img2.jpg, abt-us.jpg).
+- `chicken.jpg`, `egusi.jpg`: https://github.com/bimbo-ade/Nigeria-Cuisine-/tree/main/images (original filenames img8.jpg and img2.jpg).
 - `zobo.jpg`: embedded product photograph from https://github.com/Yuubbie/drinkup-zobo/blob/main/index.html (DRINK-UP sample product).
 
 Photos are retained as downloaded without generated replacements or image alterations.
@@ -14,4 +14,4 @@ Banga, Ogbono, Efo riro, Okra, Edikang Ikong, Moi moi, Ofada rice and yam porrid
 
 ## Combo image correction
 
-The Veejay Meal Deal displays a four-photo grid of the actual demo components (jollof rice, chicken, meat pie, zobo), rather than an unrelated single meal photograph. Each photograph retains the provenance above.
+The Veejay Meal Deal displays a four-photo grid of the actual demo components (jollof rice, chicken, meat pie, zobo), rather than the retired unrelated amala photograph. Each photograph retains the provenance above. The owner menu uses the verified jollof photograph as its compact thumbnail.
