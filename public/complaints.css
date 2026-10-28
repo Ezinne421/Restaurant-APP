@@ -1,0 +1,47 @@
+.case-details {
+  margin: 20px 0;
+  padding: 16px;
+  border-radius: 10px;
+  background: var(--soft);
+  text-align: left;
+}
+
+.case-details p {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 0;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.case-details p:last-child {
+  border-bottom: 0;
+}
+
+.case-details b {
+  color: var(--ink);
+  text-align: right;
+}
+
+.case-details .case-message {
+  display: block;
+}
+
+.case-details .case-message b {
+  display: block;
+  margin-top: 8px;
+  text-align: left;
+  line-height: 1.6;
+}
+
+.case-closed {
+  padding: 13px;
+  border-radius: 8px;
+  background: #e7f2e3;
+  color: var(--green);
+  font-size: 10px;
+  font-weight: 700;
+}

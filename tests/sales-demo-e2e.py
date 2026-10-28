@@ -73,6 +73,12 @@ with sync_playwright() as playwright:
     assert page.get_by_text("Today’s sales", exact=True).is_visible()
     page.locator('[data-owner-view="complaints"]').first.click()
     assert page.get_by_text("The demo order was missing the zobo.", exact=True).is_visible()
+    newest_case = page.locator(".complaint-list article").first
+    newest_case.get_by_role("button", name="Open complaint").click()
+    assert page.get_by_text("Customer report", exact=True).is_visible()
+    assert page.get_by_text("The demo order was missing the zobo.", exact=True).last.is_visible()
+    page.get_by_role("button", name="Approve demo refund").click()
+    assert page.get_by_text("Demo refund approved and case closed", exact=True).is_visible()
 
     # Owner stock changes immediately affect Customer menu.
     page.locator('[data-owner-view="menu"]').click()
