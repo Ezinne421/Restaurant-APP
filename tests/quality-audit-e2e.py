@@ -27,6 +27,12 @@ with sync_playwright() as playwright:
             assert page.evaluate("orderingStatus(new Date('2026-10-28T10:00:00Z')).open")
             assert not page.evaluate("orderingStatus(new Date('2026-11-01T20:00:00Z')).open")
             assert "Opens" in page.evaluate("orderingStatus(new Date('2026-11-01T20:00:00Z')).label")
+            assert page.locator(".context-card").count() == 2
+            page.get_by_role("button", name="Drinks", exact=True).click()
+            assert page.locator(".product-card").count() == 6
+            for drink in ("Fresh Chapman", "Tigernut Milk", "Pineapple–Ginger Juice", "Assorted Minerals", "Chilled Malt Drink"):
+                assert page.get_by_role("heading", name=drink, exact=True).is_visible()
+            page.get_by_role("button", name="All", exact=True).click()
             page.locator('[data-item="deal"]').click()
             assert page.locator(".item-dialog-photos img").count() == 4
             assert page.locator('img[src="assets/food/meal-deal.jpg"]').count() == 0

@@ -1,12 +1,13 @@
-const CACHE = 'veejay-foods-demo-v10';
+const CACHE = 'veejay-foods-demo-v11';
 const ASSETS = [
-  './','./index.html','./app.js','./style.css','./safe-area.css','./complaints.css','./audit-fixes.css','./pwa.css','./manifest.webmanifest','./assets/veejay-logo.png',
+  './','./index.html','./app.js','./style.css','./safe-area.css','./complaints.css','./audit-fixes.css','./premium-header.css','./pwa.css','./manifest.webmanifest','./assets/veejay-logo.png',
   './assets/food/banga.jpeg','./assets/food/chicken.jpg','./assets/food/edikaikong.jpeg',
   './assets/food/efo.jpeg','./assets/food/egusi.jpg','./assets/food/fried-rice.jpg',
   './assets/food/jollof.jpeg','./assets/food/meat-pie.jpeg',
   './assets/food/mixed-okra.jpeg','./assets/food/moi-moi.jpg','./assets/food/ofada-rice.jpeg',
   './assets/food/ogbono.jpg','./assets/food/puff-puff.jpeg','./assets/food/yam-porridge.jpeg','./assets/food/zobo.jpg',
-  './assets/food/owo.webp','./assets/food/ukodo.webp'
+  './assets/food/owo.webp','./assets/food/ukodo.webp',
+  './assets/food/chapman.webp','./assets/food/tigernut.webp','./assets/food/pineapple-ginger.webp','./assets/food/minerals.webp','./assets/food/malt.webp'
 ];
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key)))).then(() => self.clients.claim())));

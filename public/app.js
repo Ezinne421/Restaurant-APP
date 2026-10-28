@@ -6,6 +6,11 @@ const MENU = [
   {id:'egusi',name:'Egusi & Pounded Yam',description:'Melon-seed soup, leafy greens and soft pounded yam.',price:3500,category:'Soups & swallow'},
   {id:'pie',name:'Freshly Baked Meat Pie',description:'Golden pastry filled with seasoned beef and vegetables.',price:800,category:'Pastries'},
   {id:'zobo',name:'Hibiscus Zobo',description:'Chilled house brew with ginger and pineapple.',price:700,category:'Drinks'},
+  {id:'chapman',name:'Fresh Chapman',description:'Sparkling citrus fruit mix served cold with cucumber and orange.',price:1200,category:'Drinks',badge:'HOUSE FAVOURITE'},
+  {id:'tigernut',name:'Tigernut Milk',description:'Creamy natural tigernut drink, lightly sweetened and chilled.',price:1200,category:'Drinks'},
+  {id:'pineapple',name:'Pineapple–Ginger Juice',description:'Fresh pineapple blended with a bright ginger finish.',price:1200,category:'Drinks'},
+  {id:'minerals',name:'Assorted Minerals',description:'Choose a chilled cola, orange or lemon-lime soft drink.',price:600,category:'Drinks'},
+  {id:'malt',name:'Chilled Malt Drink',description:'Rich, dark and refreshing non-alcoholic malt.',price:800,category:'Drinks'},
   {id:'puff',name:'Golden Puff Puff',description:'Six soft, golden bites made fresh today.',price:1000,category:'Pastries'},
   {id:'banga',name:'Banga Soup & Starch',description:'Delta palm-fruit soup with catfish, native spices and starch.',price:4500,category:'Delta & Isoko',badge:'DELTA FAVOURITE'},
   {id:'owo',name:'Owo Soup & Starch',description:'Isoko and Urhobo palm-oil soup with fish and crayfish.',price:4000,category:'Delta & Isoko'},
@@ -21,7 +26,7 @@ const MENU = [
 
 const PHOTOS = {
   deal:'jollof.jpeg',jollof:'jollof.jpeg',chicken:'chicken.jpg',fried:'fried-rice.jpg',egusi:'egusi.jpg',pie:'meat-pie.jpeg',
-  zobo:'zobo.jpg',puff:'puff-puff.jpeg',banga:'banga.jpeg',owo:'owo.webp',ukodo:'ukodo.webp',ogbono:'ogbono.jpg',
+  zobo:'zobo.jpg',chapman:'chapman.webp',tigernut:'tigernut.webp',pineapple:'pineapple-ginger.webp',minerals:'minerals.webp',malt:'malt.webp',puff:'puff-puff.jpeg',banga:'banga.jpeg',owo:'owo.webp',ukodo:'ukodo.webp',ogbono:'ogbono.jpg',
   efo:'efo.jpeg',okra:'mixed-okra.jpeg',edikaikong:'edikaikong.jpeg',moi:'moi-moi.jpg',ofada:'ofada-rice.jpeg',yam:'yam-porridge.jpeg'
 };
 const CATEGORIES = ['All','Combos','Delta & Isoko','Rice & meals','Soups & swallow','Pastries','Drinks'];
@@ -112,8 +117,8 @@ function shell(content, options={}) {
   const unread = state.notifications.filter(n=>!n.read).length;
   return `<header class="topbar">
     <button class="brand-button" data-home aria-label="Veejay Foods home"><img src="assets/veejay-logo.png" alt=""><span>Veejay <b>Foods</b></span></button>
-    <div class="role-context"><small>VIEWING AS</small><button data-open-role>${roleLabel()}⌄</button></div>
-    ${state.role==='customer'?`<div class="location-pill"><span>⌖</span><div><small>PICKUP AT</small><select id="outlet-select">${['Wuse II','Garki','Jabi'].map(x=>`<option ${x===state.outlet?'selected':''}>${x}</option>`).join('')}</select></div></div><div class="global-search"><span>⌕</span><input id="search" value="${esc(query)}" placeholder="Search meals" aria-label="Search meals"></div><button class="bag-button" data-scroll-basket>Bag <b>${cartCount()}</b></button>`:''}
+    <div class="context-switcher"><button class="context-card role-card" data-open-role><span class="context-icon">◎</span><span><small>VIEWING AS</small><b>${roleLabel()}</b></span><span class="context-arrow">⌄</span></button>${state.role==='customer'?`<label class="context-card pickup-card"><span class="context-icon">⌖</span><span><small>PICKUP LOCATION</small><select id="outlet-select" aria-label="Pickup location">${['Wuse II','Garki','Jabi'].map(x=>`<option ${x===state.outlet?'selected':''}>${x}</option>`).join('')}</select></span><span class="context-arrow">⌄</span></label>`:''}</div>
+    ${state.role==='customer'?`<div class="global-search"><span>⌕</span><input id="search" value="${esc(query)}" placeholder="Search meals" aria-label="Search meals"></div><button class="bag-button" data-scroll-basket>Bag <b>${cartCount()}</b></button>`:''}
     ${state.role!=='customer'?`<div class="top-spacer"></div><button class="outline-button" data-guide>▶ Guided demo</button>`:''}
     <button class="icon-button" data-notifications aria-label="Notifications">♢${unread?`<i>${unread}</i>`:''}</button>
   </header>

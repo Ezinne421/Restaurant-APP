@@ -15,3 +15,7 @@ Banga, Ogbono, Efo riro, Okra, Edikang Ikong, Moi moi, Ofada rice and yam porrid
 ## Combo image correction
 
 The Veejay Meal Deal displays a four-photo grid of the actual demo components (jollof rice, chicken, meat pie, zobo), rather than the retired unrelated amala photograph. Each photograph retains the provenance above. The owner menu uses the verified jollof photograph as its compact thumbnail.
+
+## Expanded drinks
+
+`chapman.webp`, `tigernut.webp`, `pineapple-ginger.webp`, `minerals.webp`, and `malt.webp` are photorealistic menu illustrations generated for this sales demo on 2026-10-28. They are unbranded representations and should be replaced with approved Veejay Foods or supplier product photography before commercial launch.
