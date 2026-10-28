@@ -1,0 +1,13 @@
+# Local build tools and generated Android outputs
+.toolchains/
+.gradle/
+android/build/
+android/app/src/main/assets/
+android/*.keystore
+
+# Generated previews and local artifacts
+artifacts/
+
+# Local editor and OS files
+.DS_Store
+*.log
