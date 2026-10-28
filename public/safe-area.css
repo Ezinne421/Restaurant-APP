@@ -11,3 +11,10 @@ body {
   padding-top: 0;
   padding-bottom: 0;
 }
+
+/* The Android wrapper owns the system-bar clearance. Keep the first app row
+   inside that protected viewport even when a device uses a camera cutout. */
+.native-app {
+  min-height: 100%;
+  background: #fff;
+}
