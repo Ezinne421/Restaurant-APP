@@ -68,6 +68,7 @@ let authStep = 1;
 let authDraft = {name:'Amina Bello',phone:'0803 123 4567'};
 const app = document.querySelector('#app');
 const modal = document.querySelector('#modal');
+if (location.protocol === 'file:') document.documentElement.classList.add('native-app');
 const showModal = () => { if (!modal.open) modal.showModal(); };
 
 function save() { localStorage.setItem(STORE_KEY, JSON.stringify(state)); }
@@ -78,8 +79,16 @@ function menuItem(id) {
 }
 function cartCount() { return Object.values(state.cart).reduce((a,b)=>a+b,0); }
 function cartTotal() { return Object.entries(state.cart).reduce((sum,[id,qty])=>sum+menuItem(id).price*qty,0); }
-function customerOrders() { return state.orders.filter(o => !state.customer || o.phone === state.customer.phone || o.id.startsWith('seed-')); }
+function customerOrders() { return state.customer ? state.orders.filter(o => o.phone === state.customer.phone) : []; }
 function activeOrders(outlet=null) { return state.orders.filter(o=>o.status<3 && (!outlet || o.outlet===outlet)); }
+function pickupSlots() {
+  const slots=[];
+  for(let mins=12*60+30;mins<=15*60;mins+=state.settings.slotMinutes) slots.push(`${String(Math.floor(mins/60)).padStart(2,'0')}:${String(mins%60).padStart(2,'0')}`);
+  return slots;
+}
+function slotIsFull(day, slot) {
+  return state.orders.filter(o=>o.outlet===state.outlet&&o.day===day&&o.slot===slot&&o.status<3).length>=state.settings.slotCapacity;
+}
 function addNotification(title, body, orderId) {
   state.notifications.unshift({id:uid(),title,body,orderId,read:false,time:Date.now()});
   state.notifications = state.notifications.slice(0,20);
@@ -166,7 +175,7 @@ function productCard(p) {
   const qty = state.cart[p.id] || 0;
   return `<article class="product-card ${p.available?'':'sold-out'}"><button class="product-photo" data-item="${p.id}">${p.badge?`<span>${p.badge}</span>`:''}${productPhoto(p)}${p.available?'':'<b class="sold-label">SOLD OUT</b>'}</button><div class="product-body"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><div><b>${money(p.price)}</b>${p.available?(qty?stepper(p.id,qty):`<button class="add-button" data-add="${p.id}">+ Add</button>`):'<button class="add-button" disabled>Unavailable</button>'}</div></div></article>`;
 }
-function stepper(id, qty) { return `<div class="stepper"><button data-qty="${id}" data-delta="-1">−</button><span>${qty}</span><button data-qty="${id}" data-delta="1">+</button></div>`; }
+function stepper(id, qty) { const name=esc(menuItem(id).name);return `<div class="stepper"><button data-qty="${id}" data-delta="-1" aria-label="Remove one ${name}">−</button><span>${qty}</span><button data-qty="${id}" data-delta="1" aria-label="Add one ${name}">+</button></div>`; }
 function basket() {
   const entries = Object.entries(state.cart).filter(([,qty])=>qty>0);
   return `<aside id="basket"><div class="basket-card"><div class="basket-head"><h3>Your basket</h3><span>${cartCount()} items</span></div>${entries.length?entries.map(([id,qty])=>{const p=menuItem(id);return `<div class="basket-row"><div><b>${esc(p.name)}</b><small>${money(p.price)} each</small></div>${stepper(id,qty)}<strong>${money(p.price*qty)}</strong></div>`}).join(''):`<div class="basket-empty"><span>🛍️</span><b>Something delicious belongs here.</b><p>Add your favourites and we’ll take care of the cooking.</p></div>`}${entries.length?`<div class="basket-total"><span>Total</span><b>${money(cartTotal())}</b></div><button class="primary" data-checkout>Choose pickup time →</button><small class="basket-caption">Pickup at ${esc(state.outlet)} · No delivery fees</small>`:''}</div><div class="promo-card"><b>Lunch plans? Sorted.</b><p>Try the Veejay Meal Deal for a complete lunch in one tap.</p></div></aside>`;
@@ -207,7 +216,7 @@ function kitchenCard(o) {
 }
 
 function renderOwner() {
-  const content = `<main class="workspace owner"><div class="workspace-head"><div><span>OWNER & ADMIN</span><h1>${ownerView==='overview'?'Good afternoon, Ada.':ownerView[0].toUpperCase()+ownerView.slice(1)}</h1><p>${ownerView==='overview'?"Here’s how Veejay Foods is doing today.":'Manage the business demo from one place.'}</p></div><button class="outline-button" data-export>⇩ Export demo report</button></div>
+  const content = `<main class="workspace owner"><div class="workspace-head"><div><span>OWNER & ADMIN</span><h1>${ownerView==='overview'?'Good afternoon, Ada.':ownerView[0].toUpperCase()+ownerView.slice(1)}</h1><p>${ownerView==='overview'?"Here’s how Veejay Foods is doing today.":'Manage the business demo from one place.'}</p></div><button class="outline-button" data-export>▤ View demo report</button></div>
     <nav class="admin-nav">${[['overview','Overview'],['orders','Orders'],['menu','Menu & stock'],['complaints','Complaints'],['settings','Demo settings']].map(([id,label])=>`<button class="${ownerView===id?'active':''}" data-owner-view="${id}">${label}${id==='complaints'?` <i>${state.complaints.filter(c=>c.status==='Open').length}</i>`:''}</button>`).join('')}</nav>
     ${ownerContent()}</main>`;
   app.innerHTML = shell(content);
@@ -231,7 +240,7 @@ function overviewPanel() {
   <section class="panel recent"><div class="panel-head"><div><h2>Recent orders</h2><p>Live across all outlets</p></div><button data-owner-view="orders">View all →</button></div>${orderTable(state.orders.slice(0,5))}</section>`;
 }
 function orderTable(orders) {
-  return `<div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Outlet / pickup</th><th>Total</th><th>Status</th></tr></thead><tbody>${orders.map(o=>`<tr><td><b>#${esc(o.code)}</b></td><td>${esc(o.customer)}<small>${esc(o.phone)}</small></td><td>${esc(o.outlet)}<small>${esc(o.slot)}</small></td><td><b>${money(o.total)}</b></td><td><span class="status status-${o.status}">${STATUS[o.status]}</span></td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Outlet / pickup</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody>${orders.map(o=>`<tr><td><b>#${esc(o.code)}</b></td><td>${esc(o.customer)}<small>${esc(o.phone)}</small></td><td>${esc(o.outlet)}<small>${esc(o.slot)}</small></td><td><b>${money(o.total)}</b></td><td><span class="status status-${o.status}">${STATUS[o.status]}</span></td><td><button class="table-action" data-order-detail="${o.id}">View</button></td></tr>`).join('')}</tbody></table></div>`;
 }
 function ordersPanel() { return `<section class="panel"><div class="panel-head"><div><h2>All demo orders</h2><p>Paid orders across three pickup points</p></div><span>${state.orders.length} orders</span></div>${orderTable(state.orders)}</section>`; }
 function menuPanel() {
@@ -258,10 +267,12 @@ function showOtp() {
 function openCheckout() {
   if (!cartCount()) return;
   if (!state.customer) { openAuth(); toast('Sign in before checkout'); return; }
-  modal.innerHTML = `<div class="checkout-dialog"><div class="modal-head"><div><span>SECURE DEMO CHECKOUT</span><h2>Pickup and payment</h2></div><button class="modal-close" data-close>×</button></div><div class="checkout-grid"><section><label>Pickup day<div class="choice-row">${['Today','Tomorrow'].map(x=>`<button class="${checkoutState.day===x?'selected':''}" data-checkout-day="${x}">${x}</button>`).join('')}</div></label><label>Pickup time<div class="choice-row wrap">${['12:30','13:00','13:30','14:00','14:30','15:00'].map(x=>`<button class="${checkoutState.slot===x?'selected':''}" data-checkout-slot="${x}">${x}</button>`).join('')}</div></label><label>Kitchen note<textarea id="checkout-note" placeholder="e.g. A little less pepper">${esc(checkoutState.note)}</textarea></label><label>Payment method<div class="payment-methods">${[['Card','▣'],['Bank transfer','↔'],['USSD','#']].map(([x,icon])=>`<button class="${checkoutState.payment===x?'selected':''}" data-checkout-payment="${x}"><i>${icon}</i><span>${x}</span></button>`).join('')}</div></label><div class="safe-note">🔒 Hosted payment simulation. No card details or money are collected.</div></section><aside><h3>Order summary</h3>${Object.entries(state.cart).filter(([,q])=>q).map(([id,q])=>{const p=menuItem(id);return `<p><span>${q} × ${esc(p.name)}</span><b>${money(q*p.price)}</b></p>`}).join('')}<div class="checkout-total"><span>Total</span><b>${money(cartTotal())}</b></div><button class="primary" data-pay="success">Simulate successful payment</button><div class="scenario-buttons"><button data-pay="failed">Test declined payment</button><button data-pay="cancelled">Test cancellation</button></div></aside></div></div>`;
+  const slots=pickupSlots();if(!slots.includes(checkoutState.slot))checkoutState.slot=slots[0];
+  modal.innerHTML = `<div class="checkout-dialog"><div class="modal-head"><div><span>SECURE DEMO CHECKOUT</span><h2>Pickup and payment</h2></div><button class="modal-close" data-close>×</button></div><div class="checkout-grid"><section><label>Pickup day<div class="choice-row">${['Today','Tomorrow'].map(x=>`<button class="${checkoutState.day===x?'selected':''}" data-checkout-day="${x}">${x}</button>`).join('')}</div></label><label>Pickup time<div class="choice-row wrap">${slots.map(x=>{const full=slotIsFull(checkoutState.day,x);return `<button class="${checkoutState.slot===x?'selected':''}" data-checkout-slot="${x}" ${full?'disabled':''}>${x}${full?' · Full':''}</button>`}).join('')}</div></label><label>Kitchen note<textarea id="checkout-note" placeholder="e.g. A little less pepper">${esc(checkoutState.note)}</textarea></label><label>Payment method<div class="payment-methods">${[['Card','▣'],['Bank transfer','↔'],['USSD','#']].map(([x,icon])=>`<button class="${checkoutState.payment===x?'selected':''}" data-checkout-payment="${x}"><i>${icon}</i><span>${x}</span></button>`).join('')}</div></label><div class="safe-note">🔒 Hosted payment simulation. No card details or money are collected.</div></section><aside><h3>Order summary</h3>${Object.entries(state.cart).filter(([,q])=>q).map(([id,q])=>{const p=menuItem(id);return `<p><span>${q} × ${esc(p.name)}</span><b>${money(q*p.price)}</b></p>`}).join('')}<div class="checkout-total"><span>Total</span><b>${money(cartTotal())}</b></div><button class="primary" data-pay="success" ${slotIsFull(checkoutState.day,checkoutState.slot)?'disabled':''}>Simulate successful payment</button><div class="scenario-buttons"><button data-pay="failed">Test declined payment</button><button data-pay="cancelled">Test cancellation</button></div></aside></div></div>`;
   showModal();
 }
 function createOrder() {
+  if(slotIsFull(checkoutState.day,checkoutState.slot))return toast('That pickup time is full — choose another slot');
   const id = uid(); const code = `VF${String(Math.floor(1000+Math.random()*8999))}`;
   const items = Object.entries(state.cart).filter(([,q])=>q).map(([itemId,qty])=>{const p=menuItem(itemId);return {id:itemId,qty,name:p.name,price:p.price};});
   const order = {id,code,status:0,customer:state.customer.name,phone:state.customer.phone,outlet:state.outlet,day:checkoutState.day,slot:checkoutState.slot,payment:checkoutState.payment,paymentRef:`PAY-${Date.now().toString().slice(-8)}`,note:checkoutState.note,items,total:cartTotal(),createdAt:Date.now(),paidAt:Date.now()};
@@ -287,7 +298,7 @@ function openScanner() {
 }
 function openComplaint(orderId) {
   const o=state.orders.find(x=>x.id===orderId);if(!o)return;
-  modal.innerHTML=`<div class="complaint-dialog"><button class="modal-close" data-close>×</button><span>AFTER-SALES SUPPORT</span><h2>Report a problem</h2><p>Order #${esc(o.code)} · ${money(o.total)}</p><label>What happened?<select id="complaint-reason"><option>Missing item</option><option>Food temperature</option><option>Wrong order</option><option>Quality issue</option></select></label><label>Tell us more<textarea id="complaint-details" placeholder="Describe the issue"></textarea></label><label class="photo-upload">▣ <span>Add a sample photo<small>Camera/gallery simulation</small></span></label><button class="primary" data-submit-complaint="${o.id}">Submit report</button></div>`;showModal();
+  modal.innerHTML=`<div class="complaint-dialog"><button class="modal-close" data-close>×</button><span>AFTER-SALES SUPPORT</span><h2>Report a problem</h2><p>Order #${esc(o.code)} · ${money(o.total)}</p><label>What happened?<select id="complaint-reason"><option>Missing item</option><option>Food temperature</option><option>Wrong order</option><option>Quality issue</option></select></label><label>Tell us more<textarea id="complaint-details" placeholder="Describe the issue"></textarea></label><button class="primary" data-submit-complaint="${o.id}">Submit report</button></div>`;showModal();
 }
 function openComplaintCase(complaintId) {
   const c=state.complaints.find(item=>item.id===complaintId);if(!c)return;
@@ -295,6 +306,10 @@ function openComplaintCase(complaintId) {
 }
 function openGuide() {
   modal.innerHTML=`<div class="guide-dialog"><button class="modal-close" data-close>×</button><span>CLIENT PRESENTATION GUIDE</span><h2>Tell one connected story</h2><ol><li><b>Customer</b><span>Sign in, add a meal, choose a slot and simulate payment.</span><button data-role="customer">Open customer</button></li><li><b>Kitchen</b><span>Find the new order, start it and mark it ready.</span><button data-role="kitchen">Open kitchen</button></li><li><b>Customer</b><span>Show the live Ready status and collection code.</span><button data-role="customer" data-orders-after>Show order</button></li><li><b>Kitchen</b><span>Enter the collection code and confirm handover.</span><button data-scan>Open scanner</button></li><li><b>Owner</b><span>Show updated sales, menu controls and complaints.</span><button data-role="owner">Open dashboard</button></li></ol><button class="outline-button full" data-reset>Reset before presentation</button></div>`;showModal();
+}
+function openReport() {
+  const paid=state.orders.reduce((sum,o)=>sum+o.total,0),collected=state.orders.filter(o=>o.status===3).length,open=state.complaints.filter(c=>c.status==='Open').length;
+  modal.innerHTML=`<div class="receipt"><button class="modal-close" data-close>×</button><img src="assets/veejay-logo.png" alt="Veejay Foods"><span>OWNER REPORT</span><h2>Today’s demo summary</h2><div><p><span>Sales</span><b>${money(paid)}</b></p><p><span>Paid orders</span><b>${state.orders.length}</b></p><p><span>Collected</span><b>${collected}</b></p><p><span>Open complaints</span><b>${open}</b></p></div><button class="primary" data-close>Done</button><small>Live summary from the data on this device</small></div>`;showModal();
 }
 function openReset() {
   modal.innerHTML=`<div class="confirm-dialog"><span>RESET PRESENTATION</span><h2>Restore the original demo?</h2><p>This clears customer orders and menu changes made during this presentation, then restores the sample business data.</p><div><button data-close>Cancel</button><button class="danger-button" data-confirm-reset>Reset demo</button></div></div>`;showModal();
@@ -331,11 +346,11 @@ document.addEventListener('click', event => {
   if (b.dataset.view) { view=b.dataset.view;render();return; }
   if (b.dataset.ownerView) { ownerView=b.dataset.ownerView;render();return; }
   if (b.dataset.filter) { filter=b.dataset.filter;render();return; }
-  if (b.dataset.filterJump) { filter=b.dataset.filterJump;document.querySelector('.section-heading')?.scrollIntoView({behavior:'smooth'});render();return; }
+  if (b.dataset.filterJump) { filter=b.dataset.filterJump;render();requestAnimationFrame(()=>document.querySelector('.section-heading')?.scrollIntoView({behavior:'smooth'}));return; }
   if (b.dataset.clearSearch!==undefined) { query='';filter='All';render();return; }
   if (b.dataset.add) { state.cart[b.dataset.add]=(state.cart[b.dataset.add]||0)+1;if(b.dataset.closeAfter!==undefined)modal.close();save();render();toast('Added to your basket');return; }
   if (b.dataset.qty) { state.cart[b.dataset.qty]=Math.max(0,(state.cart[b.dataset.qty]||0)+Number(b.dataset.delta));if(!state.cart[b.dataset.qty])delete state.cart[b.dataset.qty];save();render();return; }
-  if (b.dataset.item) { const p=menuItem(b.dataset.item);modal.innerHTML=`<div class="item-dialog"><button class="modal-close" data-close>×</button><img src="assets/food/${PHOTOS[p.id]}" alt=""><span>${esc(p.category)}</span><h2>${esc(p.name)}</h2><p>${esc(p.description)}</p><div><b>${money(p.price)}</b><button class="primary" data-add="${p.id}" data-close-after>Add to basket</button></div><small>Representative sample photograph · Final presentation should use approved Veejay photography.</small></div>`;showModal();return; }
+  if (b.dataset.item) { const p=menuItem(b.dataset.item);modal.innerHTML=`<div class="item-dialog"><button class="modal-close" data-close>×</button><img src="assets/food/${PHOTOS[p.id]}" alt="${esc(p.name)}"><span>${esc(p.category)}</span><h2>${esc(p.name)}</h2><p>${esc(p.description)}</p><div><b>${money(p.price)}</b>${p.available?`<button class="primary" data-add="${p.id}" data-close-after>Add to basket</button>`:'<button class="primary" disabled>Currently sold out</button>'}</div><small>Representative sample photograph · Final presentation should use approved Veejay photography.</small></div>`;showModal();return; }
   if (b.dataset.scrollBasket!==undefined) { document.querySelector('#basket')?.scrollIntoView({behavior:'smooth'});return; }
   if (b.dataset.checkout!==undefined) return openCheckout();
   if (b.dataset.checkoutDay) { checkoutState.day=b.dataset.checkoutDay;checkoutState.note=document.querySelector('#checkout-note')?.value||'';openCheckout();return; }
@@ -346,9 +361,10 @@ document.addEventListener('click', event => {
   if (b.dataset.backAuth!==undefined) return openAuth();
   if (b.dataset.verify!==undefined) { if(document.querySelector('#otp').value!=='123456')return toast('Use demo code 123456');state.customer={...authDraft};save();modal.close();render();toast(`Welcome, ${state.customer.name.split(' ')[0]}!`);return; }
   if (b.dataset.receipt) return openReceipt(b.dataset.receipt);
+  if (b.dataset.orderDetail) return openKitchenDetail(b.dataset.orderDetail);
   if (b.dataset.kitchenDetail) return openKitchenDetail(b.dataset.kitchenDetail);
   if (b.dataset.advance) return advanceOrder(b.dataset.advance);
-  if (b.dataset.collectCode) { openScanner(); setTimeout(()=>{const input=document.querySelector('#scan-code');if(input)input.placeholder=b.dataset.collectCode;},0);return; }
+  if (b.dataset.collectCode) { openScanner();const input=document.querySelector('#scan-code');if(input)input.value=b.dataset.collectCode;return; }
   if (b.dataset.scan!==undefined) return openScanner();
   if (b.dataset.confirmCode!==undefined) return collectByCode();
   if (b.dataset.notifications!==undefined) return openNotifications();
@@ -360,7 +376,7 @@ document.addEventListener('click', event => {
   if (b.dataset.submitComplaint) { const o=state.orders.find(x=>x.id===b.dataset.submitComplaint);state.complaints.unshift({id:`CMP-${Math.floor(100+Math.random()*899)}`,orderCode:o.code,customer:o.customer,reason:document.querySelector('#complaint-reason').value,details:document.querySelector('#complaint-details').value||'Customer submitted a demo report.',status:'Open',amount:o.total});save();modal.close();toast('Report sent to the owner dashboard');render();return; }
   if (b.dataset.resolve) { const c=state.complaints.find(x=>x.id===b.dataset.resolve);c.status='Resolved';save();modal.close();render();toast('Demo refund approved and case closed');return; }
   if (b.dataset.price) { const p=menuItem(b.dataset.price);state.overrides[p.id]={...(state.overrides[p.id]||{}),price:Math.max(100,p.price+Number(b.dataset.priceDelta))};save();render();return; }
-  if (b.dataset.export!==undefined) return toast('Demo report prepared — export simulated offline');
+  if (b.dataset.export!==undefined) return openReport();
   if (b.dataset.editProfile!==undefined) return openAuth();
 });
 
@@ -370,7 +386,7 @@ document.addEventListener('change', event=>{
   if(el.id==='kitchen-outlet'){kitchenOutlet=el.value;render();}
   if(el.dataset.stock){state.overrides[el.dataset.stock]={...(state.overrides[el.dataset.stock]||{}),available:el.checked};save();render();toast(`${menuItem(el.dataset.stock).name} is ${el.checked?'available':'sold out'}`);}
   if(el.dataset.setting){state.settings[el.dataset.setting]=el.checked;save();}
-  if(el.dataset.settingNumber){state.settings[el.dataset.settingNumber]=Number(el.value);save();}
+  if(el.dataset.settingNumber){state.settings[el.dataset.settingNumber]=Math.max(1,Math.min(30,Number(el.value)||1));save();render();toast('Slot capacity updated');}
   if(el.dataset.settingSelect){state.settings[el.dataset.settingSelect]=Number(el.value);save();}
 });
 document.addEventListener('input',event=>{if(event.target.id==='search'){query=event.target.value;render();document.querySelector('#search')?.focus();}});

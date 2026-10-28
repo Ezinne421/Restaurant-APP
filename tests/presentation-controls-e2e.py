@@ -13,6 +13,15 @@ with sync_playwright() as playwright:
 
     # Owner can open the guide and move directly into the scanner without modal errors.
     page.locator('[data-start-role="owner"]').first.click()
+    page.get_by_role("button", name="View demo report").click()
+    assert page.get_by_role("heading", name="Today’s demo summary").is_visible()
+    page.get_by_role("button", name="Done").click()
+    page.locator('[data-owner-view="orders"]').first.click()
+    page.locator("[data-order-detail]").first.click()
+    assert page.get_by_text("KITCHEN TICKET", exact=True).is_visible()
+    page.get_by_role("button", name="Back to board").click()
+    page.locator('[data-owner-view="settings"]').click()
+    page.locator('[data-setting-select="slotMinutes"]').select_option("60")
     page.get_by_role("button", name="Guided demo").click()
     assert page.get_by_role("heading", name="Tell one connected story").is_visible()
     page.get_by_role("button", name="Open scanner").click()
@@ -43,6 +52,7 @@ with sync_playwright() as playwright:
     # Payment cancellation preserves the basket.
     page.locator('[data-add="puff"]').click()
     page.get_by_role("button", name="Choose pickup time").click()
+    assert page.locator("[data-checkout-slot]").count() == 3
     page.get_by_role("button", name="Test cancellation").click()
     assert page.locator(".basket-head").get_by_text("1 items", exact=True).is_visible()
 

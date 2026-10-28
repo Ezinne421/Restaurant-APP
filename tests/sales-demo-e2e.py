@@ -88,6 +88,14 @@ with sync_playwright() as playwright:
     page.locator('[data-view="menu"]').first.click()
     jollof_card = page.locator(".product-card", has_text="Smoky Jollof Rice")
     assert jollof_card.get_by_text("SOLD OUT", exact=True).is_visible()
+    jollof_card.locator(".product-photo").click()
+    assert page.get_by_role("button", name="Currently sold out").is_disabled()
+    page.locator("[data-close]").click()
+
+    # Customer history is private to the signed-in phone number.
+    page.locator('[data-view="orders"]').click()
+    assert page.get_by_text("ORDER #VF3712", exact=True).count() == 0
+    assert page.get_by_text("ORDER #VF1093", exact=True).count() == 0
 
     # Desktop and mobile rendering.
     page.screenshot(path=str(ARTIFACTS / "sales-demo-customer.png"), full_page=True)
