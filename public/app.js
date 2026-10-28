@@ -372,3 +372,21 @@ document.addEventListener('input',event=>{if(event.target.id==='search'){query=e
 modal.addEventListener('cancel',event=>{if(authStep===2&&!state.customer){event.preventDefault();toast('Complete demo sign-in or switch roles');}});
 
 render();
+
+let installPrompt = null;
+const installButton = document.querySelector('#install-app');
+window.addEventListener('beforeinstallprompt', event => {
+  event.preventDefault();
+  installPrompt = event;
+  installButton.hidden = false;
+});
+installButton.addEventListener('click', async () => {
+  if (!installPrompt) return;
+  await installPrompt.prompt();
+  installPrompt = null;
+  installButton.hidden = true;
+});
+window.addEventListener('appinstalled', () => toast('Veejay Foods installed'));
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
