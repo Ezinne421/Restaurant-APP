@@ -22,6 +22,11 @@ with sync_playwright() as playwright:
         if role == "customer":
             visible_logos = page.locator('img[src="assets/veejay-logo.png"]').evaluate_all("images => images.filter(img => img.getClientRects().length).length")
             assert visible_logos == 1
+            page.locator('[data-item="deal"]').click()
+            assert page.locator(".item-dialog-photos img").count() == 4
+            assert page.locator('img[src="assets/food/meal-deal.jpg"]').count() == 0
+            assert page.locator(".item-dialog-photos").evaluate("grid => [...grid.children].every(img => img.getBoundingClientRect().right <= grid.getBoundingClientRect().right + 1 && img.getBoundingClientRect().bottom <= grid.getBoundingClientRect().bottom + 1)")
+            page.locator("[data-close]").click()
         assert page.evaluate("document.documentElement.scrollWidth <= window.innerWidth + 1"), role
         assert page.evaluate("[...document.images].every(img => img.complete && img.naturalWidth > 0)"), role
         assert page.evaluate("new Set([...document.querySelectorAll('[id]')].map(el => el.id)).size === document.querySelectorAll('[id]').length"), role
