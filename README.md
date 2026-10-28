@@ -20,6 +20,10 @@ Every push to `main` deploys the contents of `public/` to GitHub Pages. The prod
 
 The site includes a web-app manifest and service worker. Supported browsers can install it from the **Install web app** prompt, and previously loaded assets remain available offline. Demo state is stored separately in each browser, so role changes share data within that browser rather than across different devices.
 
+### Vercel
+
+The repository includes `vercel.json` and publishes the static app from `public/`. Import the GitHub repository into Vercel without changing its build or output settings.
+
 ## Android APK
 
 The installable demo is available at `artifacts/Veejay-Foods-Demo.apk`. Copy it to an Android phone, open it, and allow installation from the browser or file manager when Android asks. The APK uses the package ID `com.veejayfoods.app`, supports Android 6.0 and later, and bundles all demo data and media for offline use. Version 2 uses the same signing identity and installs as an upgrade over version 1.
