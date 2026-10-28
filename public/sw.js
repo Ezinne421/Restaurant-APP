@@ -1,6 +1,6 @@
-const CACHE = 'veejay-foods-demo-v12';
+const CACHE = 'veejay-foods-demo-v13';
 const ASSETS = [
-  './','./index.html','./app.js','./style.css','./safe-area.css','./complaints.css','./audit-fixes.css','./premium-header.css','./meal-builder.css','./pwa.css','./manifest.webmanifest','./assets/veejay-logo.png',
+  './','./index.html','./app.js','./style.css','./safe-area.css','./complaints.css','./audit-fixes.css','./premium-header.css','./meal-builder.css','./pwa.css','./palm-wine-theme.css','./manifest.webmanifest','./assets/veejay-logo.png',
   './assets/food/banga.jpeg','./assets/food/chicken.jpg','./assets/food/edikaikong.jpeg',
   './assets/food/efo.jpeg','./assets/food/egusi.jpg','./assets/food/fried-rice.jpg',
   './assets/food/jollof.jpeg','./assets/food/meat-pie.jpeg',
