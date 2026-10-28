@@ -30,3 +30,8 @@
   height: 100%;
   object-fit: cover;
 }
+
+.open-chip.closed {
+  background: #fbe7e5;
+  color: var(--red);
+}

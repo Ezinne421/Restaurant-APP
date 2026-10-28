@@ -99,6 +99,14 @@ function toast(message) {
   clearTimeout(toast.timer); toast.timer = setTimeout(()=>el.classList.remove('visible'),3200);
 }
 function roleLabel() { return state.role==='customer'?'Customer':state.role==='kitchen'?'Kitchen staff':'Owner'; }
+function orderingStatus(now=new Date()) {
+  const parts=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:'Africa/Lagos',weekday:'short',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).formatToParts(now).filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
+  const day=parts.weekday,hour=Number(parts.hour),minute=Number(parts.minute),current=hour*60+minute;
+  const sunday=day==='Sun',open=sunday?10*60:8*60,close=sunday?18*60:20*60,isOpen=current>=open&&current<close;
+  if(isOpen)return {open:true,label:`Open · Orders until ${sunday?'6':'8'} PM`,detail:sunday?'Sunday pickup: 10 AM–6 PM':'Pickup orders: 8 AM–8 PM'};
+  const next=sunday&&current<open?'10 AM today':!sunday&&current<open?'8 AM today':sunday?'8 AM Monday':day==='Sat'?'10 AM Sunday':'8 AM tomorrow';
+  return {open:false,label:`Closed · Opens ${next}`,detail:'Pickup orders are unavailable outside operating hours'};
+}
 
 function shell(content, options={}) {
   const unread = state.notifications.filter(n=>!n.read).length;
@@ -109,7 +117,7 @@ function shell(content, options={}) {
     ${state.role!=='customer'?`<div class="top-spacer"></div><button class="outline-button" data-guide>▶ Guided demo</button>`:''}
     <button class="icon-button" data-notifications aria-label="Notifications">♢${unread?`<i>${unread}</i>`:''}</button>
   </header>
-  <div class="demo-ribbon"><span><i></i> INTERACTIVE CLIENT DEMO</span><span>No real payments or customer messages</span></div>
+  <div class="demo-ribbon"><span><i></i> INTERACTIVE CLIENT DEMO</span></div>
   ${content}
   <footer><div><b>Veejay Foods</b></div><span>Pick it. Pay it. Collect it.</span><span>Full business demo · Offline-ready</span></footer>`;
 }
@@ -156,9 +164,10 @@ function renderCustomer() {
 
 function customerMenu() {
   const products = MENU.map(x=>menuItem(x.id)).filter(p=>(filter==='All'||p.category===filter)&&(!query||`${p.name} ${p.description} ${p.category}`.toLowerCase().includes(query.toLowerCase())));
+  const hours=orderingStatus();
   return `<main class="customer-main">
     <section class="hero"><div><span>FRESHLY MADE · FULL OF FLAVOUR</span><h1>Your favourites.<br>Your kind of <em>lunch.</em></h1><p>Order ahead. Skip the queue.</p><button class="light-button" data-filter-jump="Delta & Isoko">Explore Delta favourites →</button></div><img src="assets/food/jollof.jpeg" alt="Jollof rice with chicken and plantain"></section>
-    <section class="restaurant-strip"><div><div><h2>Veejay Foods</h2><span class="open-chip">● Open for pickup</span></div><p>Nigerian favourites · Delta & Isoko · Pastries · Drinks</p><small>⌖ Abuja Municipal &nbsp; ◷ Ready from 25–35 minutes</small></div><span>✓ Pickup only</span></section>
+    <section class="restaurant-strip"><div><div><h2>Veejay Foods</h2><span class="open-chip ${hours.open?'':'closed'}">● ${hours.label}</span></div><p>Nigerian favourites · Delta & Isoko · Pastries · Drinks</p><small>⌖ Abuja Municipal &nbsp; ◷ ${hours.detail} &nbsp; · &nbsp; Mon–Sat 8 AM–8 PM · Sun 10 AM–6 PM</small></div><span>✓ Pickup only</span></section>
     <div class="shop-layout"><section><div class="section-heading"><div><h2>Explore the menu</h2><p>Real flavours, ready on your schedule.</p></div><span>${products.length} choices</span></div>
       <div class="chips">${CATEGORIES.map(c=>`<button class="${filter===c?'selected':''}" data-filter="${esc(c)}">${c}</button>`).join('')}</div>
       <div class="product-grid">${products.map(productCard).join('')}</div>

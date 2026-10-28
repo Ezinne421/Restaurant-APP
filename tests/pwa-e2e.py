@@ -15,7 +15,7 @@ with sync_playwright() as playwright:
     assert data["display"] == "standalone"
     page.wait_for_function("navigator.serviceWorker && navigator.serviceWorker.controller", timeout=15000)
     cache_names = page.evaluate("caches.keys()")
-    assert "veejay-foods-demo-v9" in cache_names
+    assert "veejay-foods-demo-v10" in cache_names
     context.set_offline(True)
     page.reload(wait_until="domcontentloaded")
     assert page.get_by_role("heading", name="One order. Three connected views.").is_visible()

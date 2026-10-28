@@ -22,6 +22,11 @@ with sync_playwright() as playwright:
         if role == "customer":
             visible_logos = page.locator('img[src="assets/veejay-logo.png"]').evaluate_all("images => images.filter(img => img.getClientRects().length).length")
             assert visible_logos == 1
+            assert page.get_by_text("Mon–Sat 8 AM–8 PM", exact=False).is_visible()
+            assert page.get_by_text("No real payments or customer messages", exact=True).count() == 0
+            assert page.evaluate("orderingStatus(new Date('2026-10-28T10:00:00Z')).open")
+            assert not page.evaluate("orderingStatus(new Date('2026-11-01T20:00:00Z')).open")
+            assert "Opens" in page.evaluate("orderingStatus(new Date('2026-11-01T20:00:00Z')).label")
             page.locator('[data-item="deal"]').click()
             assert page.locator(".item-dialog-photos img").count() == 4
             assert page.locator('img[src="assets/food/meal-deal.jpg"]').count() == 0
