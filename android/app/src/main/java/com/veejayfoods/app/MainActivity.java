@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Build;
+import android.graphics.Insets;
 import android.view.View;
+import android.view.WindowInsets;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
@@ -26,6 +29,20 @@ public final class MainActivity extends Activity {
 
         webView = new WebView(this);
         webView.setBackgroundColor(Color.WHITE);
+        webView.setOnApplyWindowInsetsListener((view, windowInsets) -> {
+            int top;
+            int bottom;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Insets bars = windowInsets.getInsets(WindowInsets.Type.systemBars());
+                top = bars.top;
+                bottom = bars.bottom;
+            } else {
+                top = windowInsets.getSystemWindowInsetTop();
+                bottom = windowInsets.getSystemWindowInsetBottom();
+            }
+            view.setPadding(0, top, 0, bottom);
+            return windowInsets;
+        });
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);

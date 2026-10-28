@@ -100,7 +100,7 @@ function shell(content, options={}) {
     ${state.role!=='customer'?`<div class="top-spacer"></div><button class="outline-button" data-guide>▶ Guided demo</button>`:''}
     <button class="icon-button" data-notifications aria-label="Notifications">♢${unread?`<i>${unread}</i>`:''}</button>
   </header>
-  <div class="demo-ribbon"><span><i></i> INTERACTIVE CLIENT DEMO</span><span>No real payments or customer messages</span><button data-guide>How to present this demo →</button></div>
+  <div class="demo-ribbon"><span><i></i> INTERACTIVE CLIENT DEMO</span><span>No real payments or customer messages</span></div>
   ${content}
   <footer><div><img src="assets/veejay-logo.png" alt=""><b>Veejay Foods</b></div><span>Pick it. Pay it. Collect it.</span><span>Full business demo · Offline-ready</span></footer>`;
 }
