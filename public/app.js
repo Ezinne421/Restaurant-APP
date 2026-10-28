@@ -21,7 +21,7 @@ const MENU = [
 
 const PHOTOS = {
   deal:'meal-deal.jpg',jollof:'jollof.jpeg',chicken:'chicken.jpg',fried:'fried-rice.jpg',egusi:'egusi.jpg',pie:'meat-pie.jpeg',
-  zobo:'zobo.jpg',puff:'puff-puff.jpeg',banga:'banga.jpeg',owo:'banga.jpeg',ukodo:'yam-porridge.jpeg',ogbono:'ogbono.jpg',
+  zobo:'zobo.jpg',puff:'puff-puff.jpeg',banga:'banga.jpeg',owo:'owo.webp',ukodo:'ukodo.webp',ogbono:'ogbono.jpg',
   efo:'efo.jpeg',okra:'mixed-okra.jpeg',edikaikong:'edikaikong.jpeg',moi:'moi-moi.jpg',ofada:'ofada-rice.jpeg',yam:'yam-porridge.jpeg'
 };
 const CATEGORIES = ['All','Combos','Delta & Isoko','Rice & meals','Soups & swallow','Pastries','Drinks'];

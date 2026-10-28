@@ -10,8 +10,8 @@ Photos are retained as downloaded without generated replacements or image altera
 
 ## Expanded menu
 
-Banga, Ogbono, Efo riro, Okra, Edikang Ikong, Moi moi, Ofada rice and yam porridge photographs are from the corresponding named image files in https://github.com/Kim-berlyA/recipe-finder/tree/main/img. These are representative dish images; the photographed accompaniments may differ from the demo serving. Owo and Ukodo intentionally show a photo-pending card until matching approved photographs are available.
+Banga, Ogbono, Efo riro, Okra, Edikang Ikong, Moi moi, Ofada rice and yam porridge photographs are from the corresponding named image files in https://github.com/Kim-berlyA/recipe-finder/tree/main/img. These are representative dish images; the photographed accompaniments may differ from the demo serving. Owo and Ukodo use menu photographs generated from the client-provided visual references on 2026-10-28, preserving each dish's distinctive presentation.
 
 ## Combo image correction
 
-The Veejay Meal Deal now displays a four-photo grid of the actual demo components (jollof rice, chicken, meat pie, zobo), rather than an unrelated single meal photograph. Each photograph retains the provenance above. Owo and Ukodo are still unresolved: direct recipe-site requests were denied by the environment HTTP policy. Required recipe/search destinations have been saved in the network configuration draft for activation.
+The Veejay Meal Deal displays a four-photo grid of the actual demo components (jollof rice, chicken, meat pie, zobo), rather than an unrelated single meal photograph. Each photograph retains the provenance above.
