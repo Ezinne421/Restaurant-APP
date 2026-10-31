@@ -441,5 +441,13 @@ installButton.addEventListener('click', async () => {
 });
 window.addEventListener('appinstalled', () => toast('Veejay Foods installed'));
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  const wasControlled = Boolean(navigator.serviceWorker.controller);
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (wasControlled && !refreshing) {
+      refreshing = true;
+      location.reload();
+    }
+  });
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' }).catch(() => {}));
 }
