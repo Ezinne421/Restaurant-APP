@@ -25,5 +25,15 @@
   <dialog id="modal"></dialog>
   <div id="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
+  <script>
+    // Track the hosted website only, leaving offline Android and local demos unchanged.
+    if (location.hostname === 'veejay-foods.vercel.app') {
+      window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+      var analytics = document.createElement('script');
+      analytics.defer = true;
+      analytics.src = '/_vercel/insights/script.js';
+      document.head.appendChild(analytics);
+    }
+  </script>
 </body>
 </html>
