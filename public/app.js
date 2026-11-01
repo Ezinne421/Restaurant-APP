@@ -42,7 +42,8 @@ const PHOTOS = {
   efo:'efo.jpeg',okra:'mixed-okra.jpeg',edikaikong:'edikaikong.jpeg',pounded:'pounded-yam.webp',eba:'eba.webp',semo:'semo.webp',fufu:'fufu.webp',starch:'starch.webp',
   beef:'beef.webp',goat:'goat.webp',turkey:'turkey.webp',catfish:'catfish.webp',croaker:'croaker.webp',assorted:'assorted.webp',stockfish:'stockfish.webp',moi:'moi-moi.jpg',ofada:'ofada-rice.jpeg',yam:'yam-porridge.jpeg'
 };
-const CATEGORIES = ['All','Combos','Delta & Isoko','Rice & meals','Soups','Swallows','Proteins','Pastries','Drinks'];
+const OUTLETS = ['Utako','Wuse II','Garki','Jabi'];
+const CATEGORIES = ['All','Favourites','Combos','Delta & Isoko','Rice & meals','Soups','Swallows','Proteins','Pastries','Drinks'];
 const STATUS = ['Placed','Preparing','Ready','Collected'];
 const STORE_KEY = 'veejay-sales-demo-v3';
 const money = value => `₦${Number(value).toLocaleString('en-NG')}`;
@@ -53,7 +54,7 @@ const item = (id, qty=1) => ({id, qty, name:MENU.find(x=>x.id===id).name, price:
 function seedState() {
   const now = Date.now();
   return {
-    version:3, started:false, role:'customer', customer:null, outlet:'Wuse II', cart:{}, overrides:{}, notifications:[],
+    version:3, started:false, role:'customer', customer:null, outlet:'Utako', favourites:{}, mealLabels:{}, pickupLocations:{}, cart:{}, overrides:{}, notifications:[],
     orders:[
       {id:'seed-ready',code:'VF2048',status:2,customer:'Amina Bello',phone:'0803 123 4567',outlet:'Wuse II',day:'Today',slot:'13:30',payment:'Bank transfer',paymentRef:'PAY-DEMO-2048',note:'Please make the chicken mild.',items:[item('deal'),item('puff')],total:6500,createdAt:now-35*60000,paidAt:now-34*60000},
       {id:'seed-preparing',code:'VF3712',status:1,customer:'Chidi Okafor',phone:'0805 882 1100',outlet:'Wuse II',day:'Today',slot:'14:00',payment:'Card',paymentRef:'PAY-DEMO-3712',note:'Extra pepper, please.',items:[item('banga'),item('zobo',2)],total:5900,createdAt:now-20*60000,paidAt:now-19*60000},
@@ -76,10 +77,17 @@ function loadState() {
 }
 
 let state = loadState();
+state.favourites ||= {};
+state.mealLabels ||= {};
+state.pickupLocations ||= {};
+
 let view = 'menu';
 let filter = 'All';
 let query = '';
-let kitchenOutlet = 'Wuse II';
+let kitchenOutlet = 'Utako';
+let kitchenStatus = 'all';
+let kitchenSlot = 'all';
+let reportPeriod = 'today';
 let ownerView = 'overview';
 let checkoutState = {day:'Today',slot:'13:30',payment:'Card',note:''};
 let authStep = 1;
@@ -130,7 +138,7 @@ function shell(content, options={}) {
   const unread = state.notifications.filter(n=>!n.read).length;
   return `<header class="topbar">
     <button class="brand-button" data-home aria-label="Veejay Foods home"><img src="assets/veejay-logo.png" alt=""><span>Veejay <b>Foods</b></span></button>
-    <div class="context-switcher"><button class="context-card role-card" data-open-role><span class="context-icon">◎</span><span><small>VIEWING AS</small><b>${roleLabel()}</b></span><span class="context-arrow">⌄</span></button>${state.role==='customer'?`<label class="context-card pickup-card"><span class="context-icon">⌖</span><span><small>PICKUP LOCATION</small><select id="outlet-select" aria-label="Pickup location">${['Wuse II','Garki','Jabi'].map(x=>`<option ${x===state.outlet?'selected':''}>${x}</option>`).join('')}</select></span><span class="context-arrow">⌄</span></label>`:''}</div>
+    <div class="context-switcher"><button class="context-card role-card" data-open-role><span class="context-icon">◎</span><span><small>VIEWING AS</small><b>${roleLabel()}</b></span><span class="context-arrow">⌄</span></button>${state.role==='customer'?`<label class="context-card pickup-card"><span class="context-icon">⌖</span><span><small>PICKUP LOCATION</small><select id="outlet-select" aria-label="Pickup location">${OUTLETS.map(x=>`<option ${x===state.outlet?'selected':''}>${x}</option>`).join('')}</select></span><span class="context-arrow">⌄</span></label>`:''}</div>
     ${state.role==='customer'?`<div class="global-search"><span>⌕</span><input id="search" value="${esc(query)}" placeholder="Search meals" aria-label="Search meals"></div><button class="bag-button" data-scroll-basket>Bag <b>${cartCount()}</b></button>`:''}
     ${state.role!=='customer'?`<div class="top-spacer"></div><button class="outline-button" data-guide>▶ Guided demo</button>`:''}
     <button class="icon-button" data-notifications aria-label="Notifications">♢${unread?`<i>${unread}</i>`:''}</button>
@@ -181,11 +189,11 @@ function renderCustomer() {
 }
 
 function customerMenu() {
-  const products = MENU.map(x=>menuItem(x.id)).filter(p=>(filter==='All'||p.category===filter||p.region===filter)&&(!query||`${p.name} ${p.description} ${p.category} ${p.region||''}`.toLowerCase().includes(query.toLowerCase())));
+  const products = MENU.map(x=>menuItem(x.id)).filter(p=>(filter==='All'||(filter==='Favourites'&&favouriteIds().includes(p.id))||p.category===filter||p.region===filter)&&(!query||`${p.name} ${p.description} ${p.category} ${p.region||''}`.toLowerCase().includes(query.toLowerCase())));
   const hours=orderingStatus();
   return `<main class="customer-main">
     <section class="hero"><div><span>FRESHLY MADE · FULL OF FLAVOUR</span><h1>Your favourites.<br>Your kind of <em>lunch.</em></h1><p>Order ahead. Skip the queue.</p><button class="light-button" data-filter-jump="Delta & Isoko">Explore Delta favourites →</button></div><img src="assets/food/jollof.jpeg" alt="Jollof rice with chicken and plantain"></section>
-    <section class="restaurant-strip"><div><div><h2>Veejay Foods</h2><span class="open-chip ${hours.open?'':'closed'}">● ${hours.label}</span></div><p>Nigerian favourites · Soups · Swallows · Proteins · Drinks</p><small>⌖ Abuja Municipal &nbsp; ◷ ${hours.detail} &nbsp; · &nbsp; Mon–Sat 8 AM–8 PM · Sun 10 AM–6 PM</small></div><span>✓ Pickup only</span></section>
+    <section class="restaurant-strip"><div><div><h2>Veejay Foods</h2><span class="open-chip ${hours.open?'':'closed'}">● ${hours.label}</span></div><p>Nigerian favourites · Soups · Swallows · Proteins · Drinks</p><small>⌖ Abuja Municipal &nbsp; ◷ ${hours.detail} &nbsp; · &nbsp; Mon–Sat 8 AM–8 PM · Sun 10 AM–6 PM</small></div><span>✓ Pickup only${pickupAddress(state.outlet)?`<small class="pickup-address">${esc(pickupAddress(state.outlet))}</small>`:''}${pickupDirections(state.outlet)}</span></section>
     <div class="shop-layout"><section><div class="section-heading"><div><h2>Explore the menu</h2><p>Real flavours, ready on your schedule.</p></div><span>${products.length} choices</span></div>
       <div class="chips">${CATEGORIES.map(c=>`<button class="${filter===c?'selected':''}" data-filter="${esc(c)}">${c}</button>`).join('')}</div>
       ${['Soups','Swallows','Proteins'].includes(filter)?mealBuilder():''}
@@ -205,7 +213,7 @@ function productPhoto(p) {
 }
 function productCard(p) {
   const qty = state.cart[p.id] || 0;
-  return `<article class="product-card ${p.available?'':'sold-out'}"><button class="product-photo" data-item="${p.id}">${p.badge?`<span>${p.badge}</span>`:''}${productPhoto(p)}${p.available?'':'<b class="sold-label">SOLD OUT</b>'}</button><div class="product-body"><h3>${esc(p.name)}</h3><p>${esc(p.description)}</p><div><b>${money(p.price)}</b>${p.available?(qty?stepper(p.id,qty):`<button class="add-button" data-add="${p.id}">+ Add</button>`):'<button class="add-button" disabled>Unavailable</button>'}</div></div></article>`;
+  return `<article class="product-card ${p.available?'':'sold-out'}"><button class="product-photo" data-item="${p.id}">${p.badge?`<span>${p.badge}</span>`:''}${productPhoto(p)}${p.available?'':'<b class="sold-label">SOLD OUT</b>'}</button><div class="product-body"><div class="meal-title"><h3>${esc(p.name)}</h3><button class="favourite-button" data-favourite="${p.id}" aria-label="${favouriteIds().includes(p.id)?'Remove':'Save'} ${esc(p.name)} ${favouriteIds().includes(p.id)?'from':'to'} favourites" aria-pressed="${favouriteIds().includes(p.id)}">${favouriteIds().includes(p.id)?'♥':'♡'}</button></div><p>${esc(p.description)}</p>${mealLabels(p.id)}<div><b>${money(p.price)}</b>${p.available?(qty?stepper(p.id,qty):`<button class="add-button" data-add="${p.id}">+ Add</button>`):'<button class="add-button" disabled>Unavailable</button>'}</div></div></article>`;
 }
 function stepper(id, qty) { const name=esc(menuItem(id).name);return `<div class="stepper"><button data-qty="${id}" data-delta="-1" aria-label="Remove one ${name}">−</button><span>${qty}</span><button data-qty="${id}" data-delta="1" aria-label="Add one ${name}">+</button></div>`; }
 function basket() {
@@ -222,7 +230,7 @@ function orderCard(order) {
   return `<article class="customer-order"><div class="order-top"><div><span>ORDER #${esc(order.code)}</span><h3>${status==='Ready'?'Your food is ready!':status==='Collected'?'Collected — enjoy your meal':status==='Preparing'?'The kitchen is cooking':'Payment received'}</h3><p>${esc(order.outlet)} · ${esc(order.day)} at ${esc(order.slot)}</p></div><span class="status status-${order.status}">${status}</span></div>
     <div class="timeline">${STATUS.map((s,i)=>`<div class="${order.status>=i?'done':''}"><i>${order.status>=i?'✓':i+1}</i><span>${s}</span></div>`).join('')}</div>
     <div class="order-detail"><div>${order.items.map(x=>`<p><span>${x.qty} × ${esc(x.name)}</span><b>${money(x.price*x.qty)}</b></p>`).join('')}<p class="grand"><span>Total · ${esc(order.payment)}</span><b>${money(order.total)}</b></p></div>${order.status===2?`<div class="collection-code"><canvas data-code="${esc(order.code)}" width="124" height="124"></canvas><div><small>SHOW AT THE COUNTER</small><strong>${esc(order.code)}</strong><span>Secure demo collection code</span></div></div>`:''}</div>
-    <div class="order-actions"><button data-receipt="${order.id}">View receipt</button>${order.status===3?`<button data-complaint="${order.id}">Report a problem</button>`:''}${order.status<3?'<span>Updates appear here automatically</span>':''}</div>
+    <div class="order-actions"><button data-receipt="${order.id}">View receipt</button><button data-reorder="${order.id}">Order again</button>${pickupDirections(order.outlet)}${order.status===3?`<button data-complaint="${order.id}">Report a problem</button>`:''}${order.status<3?'<span>Updates appear here automatically</span>':''}</div>
   </article>`;
 }
 
@@ -232,10 +240,12 @@ function profilePage() {
 }
 
 function renderKitchen() {
-  const visible = state.orders.filter(o=>o.outlet===kitchenOutlet && o.status<3);
-  const content = `<main class="workspace"><div class="workspace-head"><div><span>KITCHEN & COUNTER</span><h1>Live orders</h1><p>Paid orders, sorted by pickup time.</p></div><div class="workspace-controls"><label>Outlet<select id="kitchen-outlet">${['Wuse II','Garki','Jabi'].map(x=>`<option ${x===kitchenOutlet?'selected':''}>${x}</option>`).join('')}</select></label><button class="primary compact" data-scan>▣ Scan / enter code</button></div></div>
+  const active = state.orders.filter(o=>o.outlet===kitchenOutlet && o.status<3);
+  if(kitchenSlot!=='all'&&!active.some(o=>pickupKey(o)===kitchenSlot))kitchenSlot='all';
+  const visible = kitchenOrders();
+  const content = `<main class="workspace"><div class="workspace-head"><div><span>KITCHEN & COUNTER</span><h1>Live orders</h1><p>Paid orders, sorted by pickup time.</p></div><div class="workspace-controls"><label>Outlet<select id="kitchen-outlet">${OUTLETS.map(x=>`<option ${x===kitchenOutlet?'selected':''}>${x}</option>`).join('')}</select></label><button class="primary compact" data-scan>▣ Scan / enter code</button></div></div>
     <div class="metric-row"><div><span>New</span><b>${visible.filter(o=>o.status===0).length}</b><small>Awaiting kitchen</small></div><div><span>Preparing</span><b>${visible.filter(o=>o.status===1).length}</b><small>Being cooked</small></div><div><span>Ready</span><b>${visible.filter(o=>o.status===2).length}</b><small>Awaiting pickup</small></div><div><span>Next pickup</span><b>${visible.sort((a,b)=>a.slot.localeCompare(b.slot))[0]?.slot||'—'}</b><small>${kitchenOutlet}</small></div></div>
-    <div class="kitchen-board">${[0,1,2].map(status=>kitchenColumn(status,visible.filter(o=>o.status===status))).join('')}</div>
+    ${kitchenFilters(active)}<div class="kitchen-board">${[0,1,2].filter(status=>kitchenStatus==='all'||status===Number(kitchenStatus)).map(status=>kitchenColumn(status,visible.filter(o=>o.status===status))).join('')}</div>
   </main>`;
   app.innerHTML = shell(content);
 }
@@ -261,28 +271,29 @@ function ownerContent() {
   return settingsPanel();
 }
 function overviewPanel() {
-  const paid = state.orders.reduce((sum,o)=>sum+o.total,0);
+  const orders=reportOrders();
+  const paid = orders.reduce((sum,o)=>sum+o.total,0);
   const sold = {};
-  state.orders.forEach(o=>o.items.forEach(x=>sold[x.name]=(sold[x.name]||0)+x.qty));
+  orders.forEach(o=>o.items.forEach(x=>sold[x.name]=(sold[x.name]||0)+x.qty));
   const top = Object.entries(sold).sort((a,b)=>b[1]-a[1]).slice(0,5);
-  const outletSales = ['Wuse II','Garki','Jabi'].map(name=>({name,total:state.orders.filter(o=>o.outlet===name).reduce((s,o)=>s+o.total,0)}));
+  const outletSales = OUTLETS.map(name=>({name,total:orders.filter(o=>o.outlet===name).reduce((s,o)=>s+o.total,0)}));
   const max = Math.max(...outletSales.map(x=>x.total),1);
-  return `<div class="dashboard-metrics"><div><span>Today’s sales</span><b>${money(paid)}</b><small>↑ 18% demo trend</small></div><div><span>Paid orders</span><b>${state.orders.length}</b><small>${activeOrders().length} active now</small></div><div><span>Average order</span><b>${money(Math.round(paid/state.orders.length))}</b><small>Across all outlets</small></div><div><span>Collection rate</span><b>${Math.round(state.orders.filter(o=>o.status===3).length/state.orders.length*100)}%</b><small>Completed handovers</small></div></div>
-  <div class="dashboard-grid"><section class="panel sales-chart"><div class="panel-head"><div><h2>Sales by outlet</h2><p>Demo revenue today</p></div><span>Today</span></div>${outletSales.map(x=>`<div class="bar-row"><span>${x.name}</span><div><i style="width:${Math.max(4,x.total/max*100)}%"></i></div><b>${money(x.total)}</b></div>`).join('')}</section><section class="panel"><div class="panel-head"><div><h2>Popular items</h2><p>Quantity ordered</p></div></div><ol class="popular-list">${top.map(([name,qty],i)=>`<li><span>${i+1}</span><b>${esc(name)}</b><strong>${qty} sold</strong></li>`).join('')}</ol></section></div>
-  <section class="panel recent"><div class="panel-head"><div><h2>Recent orders</h2><p>Live across all outlets</p></div><button data-owner-view="orders">View all →</button></div>${orderTable(state.orders.slice(0,5))}</section>`;
+  return `${reportSelector()}<div class="dashboard-metrics"><div><span>${periodLabel()} sales</span><b>${money(paid)}</b><small>Orders paid in selected period</small></div><div><span>Paid orders</span><b>${orders.length}</b><small>${activeOrders().length} active now · all dates</small></div><div><span>Average order</span><b>${money(Math.round(paid/(orders.length||1)))}</b><small>Across all outlets</small></div><div><span>Collection rate</span><b>${Math.round(orders.filter(o=>o.status===3).length/(orders.length||1)*100)}%</b><small>Completed handovers</small></div></div>
+  <div class="dashboard-grid"><section class="panel sales-chart"><div class="panel-head"><div><h2>Sales by outlet</h2><p>Demo revenue · selected period</p></div><span>${periodLabel()}</span></div>${outletSales.map(x=>`<div class="bar-row"><span>${x.name}</span><div><i style="width:${x.total/max*100}%"></i></div><b>${money(x.total)}</b></div>`).join('')}</section><section class="panel"><div class="panel-head"><div><h2>Popular items</h2><p>Quantity ordered</p></div></div><ol class="popular-list">${top.map(([name,qty],i)=>`<li><span>${i+1}</span><b>${esc(name)}</b><strong>${qty} sold</strong></li>`).join('')}</ol></section></div>
+  <section class="panel recent"><div class="panel-head"><div><h2>Recent orders</h2><p>Live across all outlets</p></div><button data-owner-view="orders">View all →</button></div>${orderTable(orders.slice(0,5))}</section>`;
 }
 function orderTable(orders) {
   return `<div class="table-wrap"><table><thead><tr><th>Order</th><th>Customer</th><th>Outlet / pickup</th><th>Total</th><th>Status</th><th></th></tr></thead><tbody>${orders.map(o=>`<tr><td><b>#${esc(o.code)}</b></td><td>${esc(o.customer)}<small>${esc(o.phone)}</small></td><td>${esc(o.outlet)}<small>${esc(o.slot)}</small></td><td><b>${money(o.total)}</b></td><td><span class="status status-${o.status}">${STATUS[o.status]}</span></td><td><button class="table-action" data-order-detail="${o.id}">View</button></td></tr>`).join('')}</tbody></table></div>`;
 }
 function ordersPanel() { return `<section class="panel"><div class="panel-head"><div><h2>All demo orders</h2><p>Paid orders across three pickup points</p></div><span>${state.orders.length} orders</span></div>${orderTable(state.orders)}</section>`; }
 function menuPanel() {
-  return `<section class="panel"><div class="panel-head"><div><h2>Menu and availability</h2><p>Changes immediately update the customer app.</p></div><span>${MENU.filter(x=>menuItem(x.id).available).length} available</span></div><div class="menu-admin">${MENU.map(base=>{const p=menuItem(base.id);return `<div><img src="assets/food/${PHOTOS[p.id]}" alt=""><div><b>${esc(p.name)}</b><small>${esc(p.category)}</small></div><div class="price-control"><button data-price="${p.id}" data-price-delta="-100">−</button><strong>${money(p.price)}</strong><button data-price="${p.id}" data-price-delta="100">+</button></div><label class="switch"><input type="checkbox" data-stock="${p.id}" ${p.available?'checked':''}><span></span><small>${p.available?'Available':'Sold out'}</small></label></div>`}).join('')}</div></section>`;
+  return `<section class="panel"><div class="panel-head"><div><h2>Menu and availability</h2><p>Changes immediately update the customer app.</p></div><span>${MENU.filter(x=>menuItem(x.id).available).length} available</span></div><div class="menu-admin">${MENU.map(base=>{const p=menuItem(base.id);return `<div><img src="assets/food/${PHOTOS[p.id]}" alt=""><div><b>${esc(p.name)}</b><small>${esc(p.category)}</small><button class="table-action" data-edit-labels="${p.id}">Meal labels</button></div><div class="price-control"><button data-price="${p.id}" data-price-delta="-100">−</button><strong>${money(p.price)}</strong><button data-price="${p.id}" data-price-delta="100">+</button></div><label class="switch"><input type="checkbox" data-stock="${p.id}" ${p.available?'checked':''}><span></span><small>${p.available?'Available':'Sold out'}</small></label></div>`}).join('')}</div></section>`;
 }
 function complaintsPanel() {
   return `<section class="panel"><div class="panel-head"><div><h2>Complaints & refunds</h2><p>Open a case to review its details and refund decision.</p></div></div><div class="complaint-list">${state.complaints.map(c=>`<article><div><span class="status ${c.status==='Open'?'status-2':'status-3'}">${c.status}</span><small>${esc(c.id)} · Order #${esc(c.orderCode)}</small></div><h3>${esc(c.reason)}</h3><p>${esc(c.details)}</p><footer><span>${esc(c.customer)} · Paid ${money(c.amount)}</span><button data-open-case="${c.id}">Open complaint</button></footer></article>`).join('')}</div></section>`;
 }
 function settingsPanel() {
-  return `<div class="settings-grid"><section class="panel"><h2>Kitchen operations</h2><label class="setting-row"><span><b>New-order chime</b><small>Play a sound when a paid order arrives</small></span><input type="checkbox" data-setting="chime" ${state.settings.chime?'checked':''}></label><label class="setting-row"><span><b>Slot capacity</b><small>Maximum demo orders per pickup slot</small></span><input type="number" min="1" max="30" value="${state.settings.slotCapacity}" data-setting-number="slotCapacity"></label><label class="setting-row"><span><b>Slot duration</b><small>Minutes between pickup windows</small></span><select data-setting-select="slotMinutes"><option ${state.settings.slotMinutes===15?'selected':''}>15</option><option ${state.settings.slotMinutes===30?'selected':''}>30</option><option ${state.settings.slotMinutes===60?'selected':''}>60</option></select></label></section><section class="panel reset-panel"><span>CLIENT PRESENTATION</span><h2>Reset the full demo</h2><p>Restore sample orders, customer details, prices, stock and complaints before presenting again.</p><button data-reset>Reset to presentation data</button></section></div>`;
+  return `${pickupSettings()}<div class="settings-grid"><section class="panel"><h2>Kitchen operations</h2><label class="setting-row"><span><b>New-order chime</b><small>Play a sound when a paid order arrives</small></span><input type="checkbox" data-setting="chime" ${state.settings.chime?'checked':''}></label><label class="setting-row"><span><b>Slot capacity</b><small>Maximum demo orders per pickup slot</small></span><input type="number" min="1" max="30" value="${state.settings.slotCapacity}" data-setting-number="slotCapacity"></label><label class="setting-row"><span><b>Slot duration</b><small>Minutes between pickup windows</small></span><select data-setting-select="slotMinutes"><option ${state.settings.slotMinutes===15?'selected':''}>15</option><option ${state.settings.slotMinutes===30?'selected':''}>30</option><option ${state.settings.slotMinutes===60?'selected':''}>60</option></select></label></section><section class="panel reset-panel"><span>CLIENT PRESENTATION</span><h2>Reset the full demo</h2><p>Restore sample orders, customer details, prices, stock and complaints before presenting again.</p><button data-reset>Reset to presentation data</button></section></div>`;
 }
 
 function openAuth() {
@@ -340,8 +351,9 @@ function openGuide() {
   modal.innerHTML=`<div class="guide-dialog"><button class="modal-close" data-close>×</button><span>CLIENT PRESENTATION GUIDE</span><h2>Tell one connected story</h2><ol><li><b>Customer</b><span>Sign in, add a meal, choose a slot and simulate payment.</span><button data-role="customer">Open customer</button></li><li><b>Kitchen</b><span>Find the new order, start it and mark it ready.</span><button data-role="kitchen">Open kitchen</button></li><li><b>Customer</b><span>Show the live Ready status and collection code.</span><button data-role="customer" data-orders-after>Show order</button></li><li><b>Kitchen</b><span>Enter the collection code and confirm handover.</span><button data-scan>Open scanner</button></li><li><b>Owner</b><span>Show updated sales, menu controls and complaints.</span><button data-role="owner">Open dashboard</button></li></ol><button class="outline-button full" data-reset>Reset before presentation</button></div>`;showModal();
 }
 function openReport() {
-  const paid=state.orders.reduce((sum,o)=>sum+o.total,0),collected=state.orders.filter(o=>o.status===3).length,open=state.complaints.filter(c=>c.status==='Open').length;
-  modal.innerHTML=`<div class="receipt"><button class="modal-close" data-close>×</button><img src="assets/veejay-logo.png" alt="Veejay Foods"><span>OWNER REPORT</span><h2>Today’s demo summary</h2><div><p><span>Sales</span><b>${money(paid)}</b></p><p><span>Paid orders</span><b>${state.orders.length}</b></p><p><span>Collected</span><b>${collected}</b></p><p><span>Open complaints</span><b>${open}</b></p></div><button class="primary" data-close>Done</button><small>Live summary from the data on this device</small></div>`;showModal();
+  const orders = reportOrders(), paid=orders.reduce((sum,o)=>sum+o.total,0);
+  const collected=orders.filter(o=>o.status===3).length;
+  modal.innerHTML=`<div class="receipt"><button class="modal-close" data-close>×</button><span>OWNER REPORT</span><h2>${periodLabel()} demo summary</h2>${reportSelector(true)}<div><p><span>Sales</span><b>${money(paid)}</b></p><p><span>Paid orders</span><b>${orders.length}</b></p><p><span>Collected orders</span><b>${collected}</b></p><p><span>Open complaints · all dates</span><b>${state.complaints.filter(c=>c.status==='Open').length}</b></p></div><button class="primary" data-close>Done</button><small>Orders paid in the selected period · Africa/Lagos time · Data on this device</small></div>`;showModal();
 }
 function openReset() {
   modal.innerHTML=`<div class="confirm-dialog"><span>RESET PRESENTATION</span><h2>Restore the original demo?</h2><p>This clears customer orders and menu changes made during this presentation, then restores the sample business data.</p><div><button data-close>Cancel</button><button class="danger-button" data-confirm-reset>Reset demo</button></div></div>`;showModal();
@@ -370,6 +382,12 @@ function drawCodes() {
 
 document.addEventListener('click', event => {
   const b=event.target.closest('button,[data-view],[data-owner-view],[data-stock]');if(!b)return;
+  if (b.dataset.favourite) return toggleFavourite(b.dataset.favourite);
+  if (b.dataset.reorder) return reviewReorder(b.dataset.reorder);
+  if (b.dataset.confirmReorder) return confirmReorder(b.dataset.confirmReorder);
+  if (b.dataset.editLabels) return editMealLabels(b.dataset.editLabels);
+  if (b.dataset.saveLabels) return saveMealLabels(b.dataset.saveLabels);
+  if (b.dataset.savePickup!==undefined) return savePickupLocations();
   if (b.dataset.startRole) { state.started=true;state.role=b.dataset.startRole;save();render();if(state.role==='customer'&&!state.customer)openAuth();return; }
   if (b.dataset.close!==undefined) { modal.close();return; }
   if (b.dataset.openRole!==undefined) return openRolePicker();
@@ -382,7 +400,7 @@ document.addEventListener('click', event => {
   if (b.dataset.clearSearch!==undefined) { query='';filter='All';render();return; }
   if (b.dataset.add) { state.cart[b.dataset.add]=(state.cart[b.dataset.add]||0)+1;if(b.dataset.closeAfter!==undefined)modal.close();save();render();toast('Added to your basket');return; }
   if (b.dataset.qty) { state.cart[b.dataset.qty]=Math.max(0,(state.cart[b.dataset.qty]||0)+Number(b.dataset.delta));if(!state.cart[b.dataset.qty])delete state.cart[b.dataset.qty];save();render();return; }
-  if (b.dataset.item) { const p=menuItem(b.dataset.item);const photos=p.id==='deal'?`<div class="item-dialog-photos">${['jollof','chicken','pie','zobo'].map(id=>`<img src="assets/food/${PHOTOS[id]}" alt="${esc(menuItem(id).name)}">`).join('')}</div>`:`<img src="assets/food/${PHOTOS[p.id]}" alt="${esc(p.name)}">`;modal.innerHTML=`<div class="item-dialog"><button class="modal-close" data-close>×</button>${photos}<span>${esc(p.category)}</span><h2>${esc(p.name)}</h2><p>${esc(p.description)}</p><div><b>${money(p.price)}</b>${p.available?`<button class="primary" data-add="${p.id}" data-close-after>Add to basket</button>`:'<button class="primary" disabled>Currently sold out</button>'}</div><small>Representative sample photographs · Final presentation should use approved Veejay photography.</small></div>`;showModal();return; }
+  if (b.dataset.item) { const p=menuItem(b.dataset.item);const photos=p.id==='deal'?`<div class="item-dialog-photos">${['jollof','chicken','pie','zobo'].map(id=>`<img src="assets/food/${PHOTOS[id]}" alt="${esc(menuItem(id).name)}">`).join('')}</div>`:`<img src="assets/food/${PHOTOS[p.id]}" alt="${esc(p.name)}">`;modal.innerHTML=`<div class="item-dialog"><button class="modal-close" data-close>×</button>${photos}<span>${esc(p.category)}</span><h2>${esc(p.name)}</h2><p>${esc(p.description)}</p>${mealLabels(p.id,true)}<div><b>${money(p.price)}</b>${p.available?`<button class="primary" data-add="${p.id}" data-close-after>Add to basket</button>`:'<button class="primary" disabled>Currently sold out</button>'}</div><small>Representative sample photographs · Final presentation should use approved Veejay photography.</small></div>`;showModal();return; }
   if (b.dataset.scrollBasket!==undefined) { document.querySelector('#basket')?.scrollIntoView({behavior:'smooth'});return; }
   if (b.dataset.checkout!==undefined) return openCheckout();
   if (b.dataset.checkoutDay) { checkoutState.day=b.dataset.checkoutDay;checkoutState.note=document.querySelector('#checkout-note')?.value||'';openCheckout();return; }
@@ -415,7 +433,10 @@ document.addEventListener('click', event => {
 document.addEventListener('change', event=>{
   const el=event.target;
   if(el.id==='outlet-select'){state.outlet=el.value;save();render();toast(`Pickup changed to ${el.value}`);}
-  if(el.id==='kitchen-outlet'){kitchenOutlet=el.value;render();}
+  if(el.id==='kitchen-outlet'){kitchenOutlet=el.value;kitchenSlot='all';render();}
+  if(el.id==='kitchen-status'){kitchenStatus=el.value;render();}
+  if(el.id==='kitchen-slot'){kitchenSlot=el.value;render();}
+  if(el.dataset.reportPeriod!==undefined){reportPeriod=el.value;render();if(modal.open)openReport();}
   if(el.dataset.stock){state.overrides[el.dataset.stock]={...(state.overrides[el.dataset.stock]||{}),available:el.checked};save();render();toast(`${menuItem(el.dataset.stock).name} is ${el.checked?'available':'sold out'}`);}
   if(el.dataset.setting){state.settings[el.dataset.setting]=el.checked;save();}
   if(el.dataset.settingNumber){state.settings[el.dataset.settingNumber]=Math.max(1,Math.min(30,Number(el.value)||1));save();render();toast('Slot capacity updated');}
@@ -423,6 +444,92 @@ document.addEventListener('change', event=>{
 });
 document.addEventListener('input',event=>{if(event.target.id==='search'){query=event.target.value;render();document.querySelector('#search')?.focus();}});
 modal.addEventListener('cancel',event=>{if(authStep===2&&!state.customer){event.preventDefault();toast('Complete demo sign-in or switch roles');}});
+
+function favouriteIds() {
+  return state.favourites[state.customer?.phone || 'guest'] || [];
+}
+function toggleFavourite(id) {
+  const key=state.customer?.phone || 'guest', ids=favouriteIds();
+  state.favourites[key]=ids.includes(id)?ids.filter(x=>x!==id):[...ids,id];
+  save();render();
+}
+function pickupAddress(outlet) {
+  return state.pickupLocations[outlet] ?? (outlet==='Utako'?'51 Anthony Enahoro Street, Utako, Abuja':'');
+}
+function pickupDirections(outlet) {
+  const address=pickupAddress(outlet);
+  return address?`<a class="directions-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}" target="_blank" rel="noopener noreferrer" aria-label="Pickup directions for ${esc(outlet)}">Pickup directions ↗</a>`:'';
+}
+function pickupSettings() {
+  return `<section class="panel pickup-settings"><h2>Pickup directions</h2><p>Enter a confirmed street address for each outlet. Leave unconfirmed locations blank.</p>${OUTLETS.map((name,i)=>`<label>${esc(name)}<input id="pickup-address-${i}" value="${esc(pickupAddress(name))}" maxlength="200" placeholder="Confirmed street address"></label>`).join('')}<button class="primary compact" data-save-pickup>Save pickup addresses</button><small>Saved on this device</small></section>`;
+}
+function savePickupLocations() {
+  if(state.role!=='owner')return;
+  OUTLETS.forEach((name,i)=>state.pickupLocations[name]=document.querySelector('#pickup-address-'+i).value.trim());
+  save();render();toast('Pickup addresses saved');
+}
+function mealLabels(id, details=false) {
+  const labels=state.mealLabels[id] || {};
+  const badges=[labels.spice,labels.vegetarian?'Vegetarian':''].filter(Boolean);
+  return `${badges.length?`<div class="meal-labels">${badges.map(label=>`<span>${esc(label)}</span>`).join('')}</div>`:''}${details?`<small class="allergen-note">${labels.allergens?'Contains: '+esc(labels.allergens)+'. Ask the kitchen about cross-contact.':'Allergen information has not been confirmed. Ask the kitchen before ordering if you have an allergy.'}</small>`:''}`;
+}
+function editMealLabels(id) {
+  if(state.role!=='owner')return;
+  const p=menuItem(id),labels=state.mealLabels[id]||{};
+  modal.innerHTML=`<div class="receipt label-editor"><button class="modal-close" data-close>×</button><h2>Labels for ${esc(p.name)}</h2><p>Only publish details confirmed by the kitchen.</p><label>Spice level<select id="label-spice">${['','Mild','Medium','Spicy'].map(x=>`<option value="${x}" ${labels.spice===x?'selected':''}>${x||'Not confirmed'}</option>`).join('')}</select></label><label class="vegetarian-choice"><input id="label-vegetarian" type="checkbox" ${labels.vegetarian?'checked':''}> Confirmed vegetarian</label><label>Confirmed allergens<input id="label-allergens" maxlength="200" value="${esc(labels.allergens||'')}" placeholder="e.g. milk, eggs, fish"></label><small>Leave blank when unknown. This does not claim the meal is allergen-free.</small><button class="primary" data-save-labels="${id}">Save meal labels</button></div>`;showModal();
+}
+function saveMealLabels(id) {
+  if(state.role!=='owner')return;
+  state.mealLabels[id]={spice:document.querySelector('#label-spice').value,vegetarian:document.querySelector('#label-vegetarian').checked,allergens:document.querySelector('#label-allergens').value.trim()};
+  save();modal.close();render();toast('Meal labels saved');
+}
+let reorderQuote=null;
+function reorderItems(id) {
+  const order=customerOrders().find(o=>o.id===id);
+  if(!order)return null;
+  return order.items.map(old=>{
+    const base=MENU.find(p=>p.id===old.id);
+    if(!base)return {...old,available:false};
+    const p=menuItem(old.id);return {id:p.id,name:p.name,qty:old.qty,price:p.price,available:p.available};
+  });
+}
+function reviewReorder(id) {
+  const items=reorderItems(id);if(!items)return;
+  const available=items.filter(x=>x.available), total=available.reduce((sum,x)=>sum+x.price*x.qty,0);
+  reorderQuote=JSON.stringify(items);
+  modal.innerHTML=`<div class="receipt"><button class="modal-close" data-close>×</button><h2>Order again</h2><p>Review current prices. Available items will be added to your existing basket.</p>${items.map(x=>`<p class="receipt-item"><span>${x.qty} × ${esc(x.name)}${x.available?'':' · Unavailable, skipped'}</span><b>${x.available?money(x.qty*x.price):'—'}</b></p>`).join('')}<p>Items to add: <b>${money(total)}</b></p><small>Choose a fresh pickup time at checkout. No payment is made here.</small><button class="primary" data-confirm-reorder="${esc(id)}" ${available.length?'':'disabled'}>Add available items to basket</button></div>`;showModal();
+}
+function confirmReorder(id) {
+  const items=reorderItems(id);if(!items)return;
+  if(JSON.stringify(items)!==reorderQuote){reviewReorder(id);toast('Availability or prices changed. Please review again.');return;}
+  items.filter(x=>x.available).forEach(x=>state.cart[x.id]=(state.cart[x.id]||0)+x.qty);
+  checkoutState={day:'Today',slot:pickupSlots()[0],payment:'Card',note:''};
+  save();modal.close();view='menu';filter='All';query='';render();toast('Items added. Review your basket before checkout.');
+}
+function pickupKey(order) { return `${order.day}|${order.slot}`; }
+function kitchenOrders() {
+  return state.orders.filter(o=>o.outlet===kitchenOutlet&&o.status<3&&(kitchenStatus==='all'||o.status===Number(kitchenStatus))&&(kitchenSlot==='all'||pickupKey(o)===kitchenSlot))
+    .sort((a,b)=>(a.day==='Tomorrow'?1:0)-(b.day==='Tomorrow'?1:0)||a.slot.localeCompare(b.slot)||a.createdAt-b.createdAt);
+}
+function kitchenFilters(active) {
+  const slots=[...new Set(active.map(pickupKey))].sort((a,b)=>(a.startsWith('Tomorrow')?1:0)-(b.startsWith('Tomorrow')?1:0)||a.localeCompare(b));
+  return `<div class="simple-filters"><label>Status<select id="kitchen-status">${[['all','All active'],['0','Placed'],['1','Preparing'],['2','Ready']].map(([value,label])=>`<option value="${value}" ${kitchenStatus===value?'selected':''}>${label}</option>`).join('')}</select></label><label>Pickup time<select id="kitchen-slot"><option value="all">All pickup times</option>${slots.map(value=>`<option value="${esc(value)}" ${kitchenSlot===value?'selected':''}>${esc(value.replace('|',' · '))}</option>`).join('')}</select></label><span>${kitchenOrders().length} matching orders</span></div>`;
+}
+function lagosDateKey(time) {
+  return new Intl.DateTimeFormat('en-CA',{timeZone:'Africa/Lagos',year:'numeric',month:'2-digit',day:'2-digit'}).format(time);
+}
+function reportOrders(now=Date.now()) {
+  const today=lagosDateKey(now), yesterday=lagosDateKey(now-86400000), start=lagosDateKey(now-6*86400000);
+  return state.orders.filter(o=>{
+    const time=o.paidAt ?? o.createdAt;if(!Number.isFinite(time))return false;
+    const key=lagosDateKey(time);
+    return reportPeriod==='yesterday'?key===yesterday:reportPeriod==='week'?key>=start&&key<=today:key===today;
+  });
+}
+function periodLabel() { return reportPeriod==='yesterday'?'Yesterday’s':reportPeriod==='week'?'Last 7 days':'Today’s'; }
+function reportSelector(dialog=false) {
+  return `<div class="simple-filters"><label>Report period<select id="${dialog?'modal-report-period':'report-period'}" data-report-period>${[['today','Today'],['yesterday','Yesterday'],['week','Last 7 days']].map(([value,label])=>`<option value="${value}" ${reportPeriod===value?'selected':''}>${label}</option>`).join('')}</select></label><small>Africa/Lagos · Last 7 days includes today</small></div>`;
+}
 
 render();
 

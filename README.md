@@ -50,3 +50,26 @@ The local Android toolchain must be available under `/workspace/.toolchains`, or
 The three roles share persistent device-local state. Orders, status changes, customer reports, menu prices and availability update across roles immediately.
 
 This remains a sales demo, not a production ordering system. OTP, payment outcomes, notifications, QR codes, refunds, exports, camera uploads and analytics are simulations. No money, SMS or customer data leaves the device. Sample pickup times do not represent live capacity. Food photographs are representative samples, not approved Veejay product photography; see `public/assets/food/SOURCES.md` for provenance.
+
+## Small everyday conveniences
+
+- **Order again:** review current prices and available items before adding them to the existing basket. Choose a fresh pickup time and review checkout; this does not create or pay for an order.
+- **Favourites:** save meals and use the Favourites menu filter. Saved per signed-in phone number on this device.
+- **Pickup directions:** Utako uses 51 Anthony Enahoro Street, Utako, Abuja. Owner settings can save confirmed street addresses for other outlets. Unknown addresses have no directions link.
+- **Meal labels:** Owner → Menu & stock → Meal labels can set kitchen-confirmed spice level, vegetarian status and allergens. Nothing is inferred from sample photos or meal names. Unknown allergen information is clearly identified in meal details.
+- **Kitchen filters:** filter active orders by status and pickup day/time, with results sorted by pickup time.
+- **Owner reports:** Today, Yesterday and Last 7 days use payment timestamps in Africa/Lagos time. Last 7 days includes today. Collection totals refer to selected orders; open complaints and active-order counts are explicitly labelled as covering all dates.
+
+Addresses, labels, favourites and orders remain device-local demo data. Owner edits do not sync across devices. Existing saved orders and menu overrides are preserved when updating. Demo reset restores sample data and clears saved preferences.
+
+### Verify conveniences
+
+With Node.js available:
+
+```sh
+npm test
+npm run test:unit
+npm start
+```
+
+In another terminal, optionally install Playwright for browser testing (`npm install --no-save playwright`) and run `npm run test:conveniences`. The test uses an installed Google Chrome in an isolated, headless session. Set `BASE_URL` to test a deployment or `PLAYWRIGHT_MODULE` to use a separately installed Playwright package.

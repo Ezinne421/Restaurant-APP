@@ -1,0 +1,31 @@
+
+/* Small conveniences shared by customer, kitchen and owner views. */
+.meal-title { display:flex; align-items:start; justify-content:space-between; gap:8px; }
+.meal-title h3 { flex:1; }
+.favourite-button { min-width:44px; min-height:44px; flex-shrink:0; border:1px solid #d5e3d9; border-radius:50%; background:#fff; color:var(--green); font-size:24px; }
+.favourite-button[aria-pressed="true"] { background:var(--soft); }
+.meal-labels { display:flex!important; flex-wrap:wrap; gap:6px; margin:8px 0; }
+.meal-labels span { font-size:11px; color:#155a32; background:#edf6ee; border-radius:12px; padding:4px 8px; }
+.allergen-note { display:block; margin:10px 0; line-height:1.5; color:#555; }
+.directions-link { display:inline-block; color:var(--green); font-size:12px; font-weight:700; text-decoration:underline; padding:10px 0; }
+.restaurant-strip>span { display:flex; flex-direction:column; align-items:flex-end; }
+.order-actions { flex-wrap:wrap; gap:12px; }
+.simple-filters { display:flex; flex-wrap:wrap; align-items:end; gap:16px; margin:16px 0; }
+.simple-filters label,.pickup-settings label,.label-editor label { display:flex; flex-direction:column; gap:7px; font-size:13px; text-align:left; }
+.simple-filters select,.pickup-settings input,.label-editor select,.label-editor input:not([type="checkbox"]) { max-width:100%; min-height:44px; border:1px solid #d5e3d9; border-radius:8px; padding:10px; background:#fff; color:#173b24; }
+.simple-filters small { color:#666; padding:10px 0; }
+.pickup-settings { margin-bottom:20px; }
+.pickup-settings label { margin:12px 0; }
+.pickup-settings small { display:block; margin-top:10px; color:#666; }
+.label-editor label { margin:16px 0; }
+.label-editor .vegetarian-choice { flex-direction:row; align-items:center; }
+.label-editor .vegetarian-choice input { width:22px; height:22px; }
+.label-editor .primary { margin-top:16px; }
+button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible { outline:3px solid #c68a21; outline-offset:3px; }
+@media(max-width:600px) {
+  .simple-filters label { flex:1 1 130px; min-width:0; }
+  .simple-filters select { width:100%; }
+  .restaurant-strip { flex-wrap:wrap; gap:10px; }
+  .restaurant-strip>span { align-items:flex-start; }
+  .pickup-settings input { width:100%; }
+}
